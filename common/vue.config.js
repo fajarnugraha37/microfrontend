@@ -5,7 +5,7 @@ module.exports = ({
   assetsDir: "assets",
   filenameHashing: false,
   // pages: {
-  //   index: {
+  //   app: {
   //     // entry for the page
   //     entry: 'src/main.js',
   //     // the source template
@@ -45,10 +45,15 @@ module.exports = ({
     }
   },
   configureWebpack: {
-    entry: {
-      main: "./src/main.js",
-      state: "./src/state.js",
-    },
+    // entry: {
+    //   main: "./src/main.js",
+    //   state: "./src/state.js",
+    //   'mfe-components': ['mfe-components'],
+    //   qiankun: ['qiankun'],
+    //   vue: ['vue'],
+    //   vuex: ['vuex'],
+    //   'vuex-persistedstate': ['vuex-persistedstate'],
+    // },
     optimization: {
       chunkIds: "named",
       splitChunks: {
@@ -60,11 +65,14 @@ module.exports = ({
             minSize: 0 // This is example is too small to create commons chunks
           },
           vendor: {
-            test: /node_modules/,
-            chunks: "initial",
-            name: "vendor",
-            priority: 10,
-            enforce: true
+            test: /[\\/]node_modules[\\/]/, // Target modules in node_modules
+            name: 'vendors', // Name of the vendor chunk
+            chunks: 'all',
+            // test: /node_modules/,
+            // chunks: "initial",
+            // name: "vendor",
+            // priority: 10,
+            // enforce: true
           }
         }
       }
