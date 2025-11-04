@@ -9,11 +9,23 @@ export default new Vuex.Store({
       totalUsers: 1280,
       activeSessions: 87,
       satisfaction: 94
+    },
+    sharedShell: {}
+  },
+  mutations: {
+    replaceSharedShell(state, payload) {
+      state.sharedShell = { ...payload };
     }
   },
-  mutations: {},
-  actions: {},
+  actions: {
+    setSharedShell({ commit }, payload) {
+      commit('replaceSharedShell', payload);
+    }
+  },
   getters: {
-    stats: (state) => state.stats
+    stats: (state) => state.stats,
+    sharedShell: (state) => state.sharedShell,
+    sharedUser: (state) =>
+      state.sharedShell && state.sharedShell.user ? state.sharedShell.user : null
   }
 });

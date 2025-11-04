@@ -32,9 +32,9 @@ import { mapGetters } from 'vuex';
 export default {
   name: 'ProfileOverview',
   props: {
-    user: {
+    sharedShell: {
       type: Object,
-      default: null
+      default: () => ({})
     },
     sharedUtils: {
       type: Object,
@@ -42,7 +42,10 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['profile'])
+    ...mapGetters(['profile']),
+    user() {
+      return this.sharedShell && this.sharedShell.user ? this.sharedShell.user : null;
+    }
   }
 };
 </script>

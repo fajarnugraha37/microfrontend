@@ -33,11 +33,11 @@ export default {
     CButton
   },
   props: {
-    user: {
+    sharedShell: {
       type: Object,
-      default: null
+      default: () => ({})
     },
-    setGlobalState: {
+    pushSharedState: {
       type: Function,
       default: null
     }
@@ -51,10 +51,15 @@ export default {
       savedMessage: ''
     };
   },
+  computed: {
+    user() {
+      return this.sharedShell && this.sharedShell.user ? this.sharedShell.user : null;
+    }
+  },
   methods: {
     save() {
-      if (typeof this.setGlobalState === 'function') {
-        this.setGlobalState({
+      if (typeof this.pushSharedState === 'function') {
+        this.pushSharedState({
           dashboardPreferences: { ...this.form }
         });
       }

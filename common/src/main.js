@@ -20,6 +20,38 @@ function render() {
 
 render();
 
+let isSyncingFromGlobal = false;
+let serializedShellStore = JSON.stringify(store.state);
+
+globalActions.setShellStore(store.state);
+
+globalActions.onGlobalStateChange((state) => {
+  if (state && state.shellStore) {
+    const incoming = JSON.stringify(state.shellStore);
+    if (incoming !== serializedShellStore) {
+      isSyncingFromGlobal = true;
+      store.replaceState({
+        ...store.state,
+        ...state.shellStore
+      });
+      serializedShellStore = incoming;
+      isSyncingFromGlobal = false;
+    }
+  }
+});
+
+store.subscribe((mutation, state) => {
+  if (isSyncingFromGlobal) {
+    return;
+  }
+
+  const nextSerialized = JSON.stringify(state);
+  if (nextSerialized !== serializedShellStore) {
+    serializedShellStore = nextSerialized;
+    globalActions.setShellStore(state);
+  }
+});
+
 const microApps = [
   {
     name: 'app-dashboard',

@@ -28,11 +28,15 @@ export default {
     CButton
   },
   props: {
+    sharedShell: {
+      type: Object,
+      default: () => ({})
+    },
     sharedUtils: {
       type: Object,
       default: () => ({})
     },
-    setGlobalState: {
+    pushSharedState: {
       type: Function,
       default: null
     }
@@ -63,18 +67,18 @@ export default {
 
       this.saveProfile({
         bio: this.form.bio,
-        interests
+      interests
+    });
+
+    this.savedAt = new Date();
+
+    if (typeof this.pushSharedState === 'function') {
+      this.pushSharedState({
+        profilePreferences: {
+          bio: this.form.bio,
+          interests
+        }
       });
-
-      this.savedAt = new Date();
-
-      if (typeof this.setGlobalState === 'function') {
-        this.setGlobalState({
-          profilePreferences: {
-            bio: this.form.bio,
-            interests
-          }
-        });
       }
     },
     formatted(date) {

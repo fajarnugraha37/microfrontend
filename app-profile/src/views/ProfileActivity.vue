@@ -24,7 +24,7 @@ export default {
       type: Object,
       default: () => ({})
     },
-    setGlobalState: {
+    pushSharedState: {
       type: Function,
       default: null
     }
@@ -52,8 +52,8 @@ export default {
         : timestamp;
     },
     notifyShell() {
-      if (typeof this.setGlobalState === 'function') {
-        this.setGlobalState({
+      if (typeof this.pushSharedState === 'function') {
+        this.pushSharedState({
           profileLastActivity: new Date().toISOString()
         });
       }

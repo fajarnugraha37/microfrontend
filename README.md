@@ -61,7 +61,7 @@ This repository showcases a complete Vue 2 microfrontend setup built with Vue CL
 ### Notes
 
 - Each microfrontend exposes Qiankun lifecycle methods (`bootstrap`, `mount`, `unmount`) and supports local development (standalone mode) via Vue Router base configuration.
-- Global state (`user`, `token`, preferences) originates in the shell and is synchronised with child apps using `initGlobalState`.
+- Global Vuex state is synchronised across every app. The shell publishes its Vuex store through Qiankun’s `initGlobalState`, while each child updates a local `sharedShell` module and can push mutations back via `$microActions.pushSharedState(...)`.
 - Shared UI components (`CButton`, `CInput`) are published by the `components` project and imported via local file dependency (`file:../components`).
 - Shell state is persisted with `vuex-persistedstate`, demonstrating how authentication survives reloads.
 

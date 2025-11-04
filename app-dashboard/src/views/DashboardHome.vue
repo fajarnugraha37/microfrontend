@@ -38,15 +38,15 @@ export default {
     CButton
   },
   props: {
-    user: {
+    sharedShell: {
       type: Object,
-      default: null
+      default: () => ({})
     },
     sharedUtils: {
       type: Object,
       default: () => ({})
     },
-    setGlobalState: {
+    pushSharedState: {
       type: Function,
       default: null
     }
@@ -57,12 +57,15 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['stats'])
+    ...mapGetters(['stats']),
+    user() {
+      return this.sharedShell && this.sharedShell.user ? this.sharedShell.user : null;
+    }
   },
   methods: {
     notifyShell() {
-      if (typeof this.setGlobalState === 'function') {
-        this.setGlobalState({
+      if (typeof this.pushSharedState === 'function') {
+        this.pushSharedState({
           dashboardLastVisited: new Date().toISOString()
         });
       }

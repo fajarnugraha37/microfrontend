@@ -10,9 +10,9 @@
       </div>
     </header>
     <nav class="profile-app__nav">
-      <router-link to="/">Overview</router-link>
-      <router-link to="/activity">Activity</router-link>
-      <router-link to="/settings">Settings</router-link>
+      <router-link :to="{ name: 'profile-overview' }">Overview</router-link>
+      <router-link :to="{ name: 'profile-activity' }">Activity</router-link>
+      <router-link :to="{ name: 'profile-settings' }">Settings</router-link>
     </nav>
     <section class="profile-app__content">
       <router-view v-slot="{ Component }">
@@ -20,7 +20,8 @@
           :is="Component"
           :user="user"
           :shared-utils="sharedUtils"
-          :set-global-state="setGlobalState"
+          :shared-shell="sharedShell"
+          :push-shared-state="pushSharedState"
         />
       </router-view>
     </section>
@@ -28,41 +29,27 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+
 export default {
   name: 'ProfileApp',
   props: {
     sharedUtils: {
       type: Object,
       default: () => ({})
-    },
-    onGlobalStateChange: {
-      type: Function,
-      default: null
-    },
-    setGlobalState: {
-      type: Function,
-      default: null
-    },
-    getGlobalState: {
-      type: Function,
-      default: null
     }
   },
-  data() {
-    return {
-      user: null
-    };
-  },
-  mounted() {
-    if (typeof this.getGlobalState === 'function') {
-      const state = this.getGlobalState();
-      this.user = state ? state.user : null;
+  computed: {
+    ...mapGetters(['sharedShell', 'sharedUser']),
+    user() {
+      return this.sharedUser;
     }
-
-    if (typeof this.onGlobalStateChange === 'function') {
-      this.onGlobalStateChange((state) => {
-        this.user = state.user;
-      }, true);
+  },
+  methods: {
+    pushSharedState(partial = {}) {
+      if (this.$microActions && typeof this.$microActions.pushSharedState === 'function') {
+        this.$microActions.pushSharedState(partial);
+      }
     }
   }
 };

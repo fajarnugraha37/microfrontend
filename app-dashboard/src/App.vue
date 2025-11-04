@@ -13,9 +13,9 @@
       </div>
     </header>
     <nav class="dashboard-app__nav">
-      <router-link to="/">Overview</router-link>
-      <router-link to="/details">Details</router-link>
-      <router-link to="/settings">Settings</router-link>
+      <router-link :to="{ name: 'dashboard-home' }">Overview</router-link>
+      <router-link :to="{ name: 'dashboard-details' }">Details</router-link>
+      <router-link :to="{ name: 'dashboard-settings' }">Settings</router-link>
     </nav>
     <section class="dashboard-app__content">
       <router-view v-slot="{ Component }">
@@ -23,7 +23,8 @@
           :is="Component"
           :user="user"
           :shared-utils="sharedUtils"
-          :set-global-state="setGlobalState"
+          :shared-shell="sharedShell"
+          :push-shared-state="pushSharedState"
         />
       </router-view>
     </section>
@@ -31,32 +32,21 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+
 export default {
   name: 'DashboardApp',
   props: {
     sharedUtils: {
       type: Object,
       default: () => ({})
-    },
-    onGlobalStateChange: {
-      type: Function,
-      default: null
-    },
-    setGlobalState: {
-      type: Function,
-      default: null
-    },
-    getGlobalState: {
-      type: Function,
-      default: null
     }
   },
-  data() {
-    return {
-      user: null
-    };
-  },
   computed: {
+    ...mapGetters(['sharedShell', 'sharedUser']),
+    user() {
+      return this.sharedUser;
+    },
     formattedLastLogin() {
       if (!this.user || !this.user.lastLogin || !this.sharedUtils.formatDate) {
         return '';
@@ -66,28 +56,18 @@ export default {
     }
   },
   methods: {
-    bindGlobalState() {
-      if (typeof this.onGlobalStateChange === 'function') {
-        this.onGlobalStateChange((state) => {
-          this.user = state.user;
-        }, true);
-      }
-
-      if (typeof this.getGlobalState === 'function') {
-        const state = this.getGlobalState();
-        this.user = state ? state.user : null;
+    pushSharedState(partial = {}) {
+      if (this.$microActions && typeof this.$microActions.pushSharedState === 'function') {
+        this.$microActions.pushSharedState(partial);
       }
     },
     notifyShellVisited() {
-      if (typeof this.setGlobalState === 'function') {
-        this.setGlobalState({
-          lastVisitedDashboard: new Date().toISOString()
-        });
-      }
+      this.pushSharedState({
+        lastVisitedDashboard: new Date().toISOString()
+      });
     }
   },
   mounted() {
-    this.bindGlobalState();
     this.notifyShellVisited();
   }
 };
