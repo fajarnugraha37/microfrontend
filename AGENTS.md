@@ -346,3 +346,185 @@ use small, atomic commits with messages like:
 * `build(html): add vite index.html preserving vue-cli semantics`
 * `chore(env): minimal env compatibility shim`
 * `docs: add MIGRATION_REPORT`
+
+---
+
+**role**
+you’re a hands-on refactor agent with initiative. 
+keep the app running during migration. 
+prefer small, reversible changes. 
+propose improvements when low-risk.
+let's start with ./app-profile
+
+**objective**
+upgrade the repo at `./app-profile` from **vue 2.x** to **vue 3.x** using **@vue/compat** (vue-3 compat build), 
+so existing vue-2-style code & plugins keep working while we modernize gradually.
+
+**hard constraints**
+
+* use **vue 3 + @vue/compat** (compat mode on) so vue-2 api surface keeps working.
+* **no breaking runtime changes** to routes, dom ids, events, or public asset urls.
+* keep bundler (vite or webpack) working; if switching to vite is out-of-scope, stay on webpack for now.
+* unit/e2e tests must still pass (or be updated minimally).
+* document every compat flag you change.
+
+**deliverables**
+
+1. **dependencies**
+
+   * add: `vue@^3`, `@vue/compat`, `vue-router@^4` (if router present), `pinia@^2` (optional, if moving off vuex), `@vitejs/plugin-vue` or `vue-loader@next` depending on bundler.
+   * keep: `vuex@3` for now if app uses it (we can move to pinia later).
+
+2. **bundler config**
+
+   * **vite**: in `vite.config.ts`, alias `'vue'` → `'@vue/compat'`.
+   * **webpack**: in `vue.config.js` / webpack config, set:
+
+     ```js
+     resolve: { alias: { 'vue': '@vue/compat' } }
+     ```
+   * ensure jsx/ts support stays as-is (babel or esbuild).
+
+3. **app bootstrap (main entry)**
+
+   * convert `new Vue({...}).$mount('#app')` → vue-3:
+
+     ```ts
+     import { createApp } from 'vue'
+     import App from './App.vue'
+     import router from './router' // if any
+     import store from './store'   // vuex3 stays for now
+     const app = createApp(App)
+     // enable compat + silence noisy warnings you’ve audited:
+     app.config.compatConfig = {
+       MODE: 2, // behave like vue 2 by default
+       GLOBAL_MOUNT: true,
+       GLOBAL_EXTEND: true,
+       GLOBAL_PROTOTYPE: true,
+       INSTANCE_SCOPED_GLOBALS: true,
+       ATTR_FALSE_VALUE: true,
+       COMPONENT_V_MODEL: true,
+       RENDER_FUNCTION: true
+       // toggle off per-rule as you migrate
+     }
+     app.use(router)
+     app.use(store)
+     app.mount('#app')
+     ```
+   * keep global plugins using `Vue.use` working; `@vue/compat` bridges this.
+
+4. **template & api shims (targeted)**
+
+   * add a tiny **bridge util** for `$listeners`, `scopedSlots`, and filter usage:
+
+     ```ts
+     // src/compat/bridges.ts
+     export const passListeners = (ctx:any) => ctx.attrs?.on || ctx.listeners
+     export const slot = (slots:any, name:string, props?:any) =>
+       (slots?.[name] || slots?.default)?.(props)
+     // for filters, replace with methods/computed; if critical, define a global no-op filter shim for now.
+     ```
+   * add a **directive shim** if any 2.x directives rely on legacy hooks.
+
+5. **router**
+
+   * migrate to `vue-router@4` with minimal API changes (`createRouter`, `createWebHistory`). keep route meta/guards identical.
+
+6. **store (stay compatible)**
+
+   * keep **vuex3** on vue-3 compat (works). plan: later move to **pinia v2** gradually; do **not** big-bang.
+   * if any code imports from `vuex/dist/logger`, refactor to standard logger to avoid esm issues.
+
+7. **lint & types**
+
+   * switch `@types/vue` → `vue` types. add `volar`/`vue-tsc` if ts. don’t raise strictness yet—keep it compiling.
+
+8. **compat flags report**
+
+   * create `COMPAT_PLAN.md` listing:
+
+     * which **compat rules** are enabled
+     * locations of violations from runtime warnings
+     * a **checklist** to retire each rule (code areas + owner)
+
+9. **build/test**
+
+   * make the app build and boot.
+   * run tests; adjust minimal mount helpers for vue-3 test utils (`@vue/test-utils@next`).
+   * if e2e selectors rely on old render quirks, add test-only shims.
+
+10. **PR**
+
+* branch `feat/vue3-compat-bootstrap`.
+* atomic commits (deps, alias, main.ts, router, tests, docs).
+* PR body includes: what changed, compat flags, follow-ups, risk notes.
+
+**initiative (be creative, safe)**
+
+* detect & auto-codemod easy wins:
+
+  * `this.$scopedSlots` → `slots` helpers
+  * filters → computed/methods (leave TODOs if risky)
+  * event `.native` → component emits/`v-on="$attrs"`
+  * `v-model` on custom comps → `modelValue` + `update:modelValue` (only where trivial)
+* wrap any **vue-2-only plugin** behind a tiny adapter component if needed (keep runtime stable now, file a follow-up to replace it).
+* suggest a migration **worklist** ordered by: critical warnings first, then noisy ones, then nice-to-haves.
+
+**acceptance checklist (gate)**
+
+* [ ] app boots on **vue 3 + @vue/compat** with no functional regressions
+* [ ] build succeeds; routes, ids, public assets unchanged
+* [ ] vuex3 still works; router on v4
+* [ ] compat flags set; **warnings logged to console once** (not spammy)
+* [ ] `COMPAT_PLAN.md` present with clear next steps
+* [ ] unit/e2e tests pass or are updated minimally
+
+**scan & change plan (execute step-by-step)**
+
+1. **scan**
+
+   * grep repo for: `new Vue`, `Vue.use`, `filters:`, `$listeners`, `$scopedSlots`, `.native`, `v-model` on custom comps, legacy directives, `beforeDestroy`, `sync` modifier, `functional: true`, render functions.
+   * summarize hotspots.
+2. **deps & alias**
+
+   * install vue 3 + @vue/compat; set alias `'vue' -> '@vue/compat'`.
+3. **entry refactor**
+
+   * create `main.ts/js` with vue-3 bootstrap + `compatConfig`.
+4. **router/store**
+
+   * bump router to v4; keep vuex3.
+5. **codemods (safe batch)**
+
+   * replace `beforeDestroy`→`beforeUnmount`, `destroyed`→`unmounted`.
+   * replace `.native` listeners with `emits`/`inheritAttrs` forwarding where trivial.
+   * add `inheritAttrs:false` and explicit `$attrs` binding if attrs collide.
+6. **build + test**
+
+   * run build, fix obvious compat warnings by toggling specific flags off where migrated.
+7. **docs + PR**
+
+   * write `COMPAT_PLAN.md`; open PR.
+
+**nice to have (optional)**
+
+* add a **compat warning tracker** (simple runtime hook that counts warnings by rule and prints a summary).
+* set up a **feature flag** to opt-in components to pure vue-3 mode (turn off specific compat rules per-component via `compatConfig` on SFC).
+
+**inputs to fill**
+
+* `./app-profile` (absolute path)
+* bundler: `vite` or `webpack`
+* test runner: jest / vitest / cypress / playwright
+* critical plugins that are known vue-2 only (list them)
+
+**post-merge follow-ups (open issues automatically)**
+
+* retire `GLOBAL_MOUNT` and friends app-wide
+* migrate filters
+* normalize `v-model` on custom comps
+* plan vuex3 → pinia v2 per module
+
+**tone**
+
+* concise, proactive, low-risk. if unsure, leave a TODO + doc and move on.

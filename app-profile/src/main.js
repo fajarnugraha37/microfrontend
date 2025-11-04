@@ -1,10 +1,3 @@
-/* eslint-disable no-underscore-dangle */
-if (window.__POWERED_BY_QIANKUN__) {
-  // eslint-disable-next-line no-undef
-  __webpack_public_path__ = window.__INJECTED_PUBLIC_PATH_BY_QIANKUN__;
-}
-/* eslint-enable no-underscore-dangle */
-
 import Vue from 'vue';
 import App from './App.vue';
 import router from './router';
