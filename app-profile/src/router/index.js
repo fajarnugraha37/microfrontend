@@ -1,33 +1,32 @@
-import Vue from 'vue';
-import Router from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 import ProfileOverview from '../views/ProfileOverview.vue';
 import ProfileActivity from '../views/ProfileActivity.vue';
 import ProfileSettings from '../views/ProfileSettings.vue';
 
-Vue.use(Router);
+const routes = [
+  {
+    path: '/',
+    name: 'profile-overview',
+    component: ProfileOverview
+  },
+  {
+    path: '/activity',
+    name: 'profile-activity',
+    component: ProfileActivity
+  },
+  {
+    path: '/settings',
+    name: 'profile-settings',
+    component: ProfileSettings
+  }
+];
 
-const base = window.__POWERED_BY_QIANKUN__ ? '/profile' : '/';
+const getBase = () => (window.__POWERED_BY_QIANKUN__ ? '/profile' : '/');
 
-const router = new Router({
-  mode: 'history',
-  base,
-  routes: [
-    {
-      path: '/',
-      name: 'profile-overview',
-      component: ProfileOverview
-    },
-    {
-      path: '/activity',
-      name: 'profile-activity',
-      component: ProfileActivity
-    },
-    {
-      path: '/settings',
-      name: 'profile-settings',
-      component: ProfileSettings
-    }
-  ]
-});
+export const createRouterInstance = () =>
+  createRouter({
+    history: createWebHistory(getBase()),
+    routes
+  });
 
-export default router;
+export default createRouterInstance;

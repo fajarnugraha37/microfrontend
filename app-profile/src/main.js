@@ -1,13 +1,13 @@
-import Vue from 'vue';
+import { createApp, h } from 'vue';
 import App from './App.vue';
-import router from './router';
-import store from './store';
+import createRouter from './router';
+import createStore from './store';
 
-Vue.config.productionTip = false;
-
-let instance = null;
-let offGlobalStateChange = null;
+let appInstance = null;
+let routerInstance = null;
+let storeInstance = null;
 let isSyncingFromGlobal = false;
+let offGlobalStateChange = null;
 
 const teardownGlobalStateSync = () => {
   if (typeof offGlobalStateChange === 'function') {
@@ -21,42 +21,66 @@ const setupGlobalStateSync = (props = {}) => {
 
   teardownGlobalStateSync();
 
-  if (typeof onGlobalStateChange === 'function') {
+  if (typeof onGlobalStateChange === 'function' && storeInstance) {
     offGlobalStateChange = onGlobalStateChange((state) => {
       if (state && state.shellStore) {
-        const existing = store.getters.sharedShell || {};
+        const existing = storeInstance.getters.sharedShell || {};
         const incoming = state.shellStore;
         const isDifferent = JSON.stringify(existing) !== JSON.stringify(incoming);
         if (isDifferent) {
           isSyncingFromGlobal = true;
-          store.commit('replaceSharedShell', incoming);
+          storeInstance.commit('replaceSharedShell', incoming);
           isSyncingFromGlobal = false;
         }
       }
     }, true);
   }
 
-  if (typeof getGlobalState === 'function') {
+  if (typeof getGlobalState === 'function' && storeInstance) {
     const current = getGlobalState();
     if (current && current.shellStore) {
       isSyncingFromGlobal = true;
-      store.commit('replaceSharedShell', current.shellStore);
+      storeInstance.commit('replaceSharedShell', current.shellStore);
       isSyncingFromGlobal = false;
     }
   }
 };
 
-function render(props = {}) {
+const createMicroApp = (router, store, props = {}) => {
   const {
-    container,
     sharedUtils = {},
     onGlobalStateChange,
     setGlobalState,
     getGlobalState
   } = props;
 
-  Vue.prototype.$sharedUtils = sharedUtils;
-  Vue.prototype.$microActions = {
+  const app = createApp({
+    render: () =>
+      h(App, {
+        sharedUtils,
+        onGlobalStateChange,
+        setGlobalState,
+        getGlobalState
+      })
+  });
+
+  app.config.compatConfig = {
+    MODE: 2,
+    GLOBAL_MOUNT: true,
+    GLOBAL_EXTEND: true,
+    GLOBAL_PROTOTYPE: true,
+    INSTANCE_SCOPED_GLOBALS: true,
+    ATTR_FALSE_VALUE: true,
+     INSTANCE_LISTENERS: true,
+    COMPONENT_V_MODEL: true,
+    RENDER_FUNCTION: true
+  };
+
+  app.use(router);
+  app.use(store);
+
+  app.config.globalProperties.$sharedUtils = sharedUtils;
+  app.config.globalProperties.$microActions = {
     onGlobalStateChange,
     setGlobalState,
     getGlobalState,
@@ -78,25 +102,37 @@ function render(props = {}) {
     }
   };
 
+  return app;
+};
+
+const mountApp = async (props = {}) => {
+  const container = props.container
+    ? props.container.querySelector('#app')
+    : document.querySelector('#app');
+
+  if (!container) {
+    throw new Error('[app-profile] mount container not found');
+  }
+
+  if (appInstance) {
+    appInstance.unmount();
+    appInstance = null;
+  }
+
+  routerInstance = createRouter();
+  storeInstance = createStore();
+  const app = createMicroApp(routerInstance, storeInstance, props);
   setupGlobalStateSync(props);
 
-  instance = new Vue({
-    router,
-    store,
-    render: (h) =>
-      h(App, {
-        props: {
-          sharedUtils,
-          onGlobalStateChange,
-          setGlobalState,
-          getGlobalState
-        }
-      })
-  }).$mount(container ? container.querySelector('#app') : '#app');
-}
+  app.mount(container);
+  if (routerInstance && typeof routerInstance.isReady === 'function') {
+    await routerInstance.isReady();
+  }
+  appInstance = app;
+};
 
 if (!window.__POWERED_BY_QIANKUN__) {
-  render();
+  mountApp();
 }
 
 export async function bootstrap() {
@@ -104,15 +140,17 @@ export async function bootstrap() {
 }
 
 export async function mount(props) {
-  render(props);
+  await mountApp(props);
 }
 
 export async function unmount() {
   teardownGlobalStateSync();
 
-  if (instance) {
-    instance.$destroy();
-    instance.$el.innerHTML = '';
-    instance = null;
+  if (appInstance) {
+    appInstance.unmount();
+    appInstance = null;
   }
+
+  routerInstance = null;
+  storeInstance = null;
 }
