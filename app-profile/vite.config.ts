@@ -41,7 +41,7 @@ export default defineConfig(({ command }) => ({
   },
   build: {
     outDir: 'dist',
-    emptyOutDir: true,
+    emptyOutDir: false,
     cssCodeSplit: false,
     lib: {
       entry: path.resolve(__dirname, 'src/main.js'),
@@ -51,6 +51,17 @@ export default defineConfig(({ command }) => ({
     },
     rollupOptions: {
       output: {
+        // manualChunks(id) {
+        //   if (id.includes('node_modules')) {
+        //     return 'chunk-vendors';
+        //   }
+        //   return undefined;
+        // },
+        // entryFileNames: (chunk) =>
+        //   chunk.name === 'main'
+        //     ? `js/app.${HASH}.js`
+        //     : `js/[name].${HASH}.js`,
+        // chunkFileNames: `js/[name].${HASH}.js`,
         assetFileNames: (assetInfo) => {
           const ext = path.extname(assetInfo.name || '').slice(1);
           if (ext === 'css') {

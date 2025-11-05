@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build:esm": "vite build",
+    "build:umd": "vite build --config vite.umd.config.ts",
+    "build": "pnpm run build:esm && pnpm run build:umd",
     "preview": "vite preview",
     "lint": "eslint --ext .js,.vue src"
   },

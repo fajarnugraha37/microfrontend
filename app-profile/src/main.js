@@ -336,10 +336,15 @@ const mountApp = async (props = {}) => {
   const container = props.container || (typeof props.domElementGetter === 'function'
     ? props.domElementGetter()
     : null);
+  const qiankunContainer = props.container && props.container.querySelector
+    ? props.container.querySelector('#app')
+    : null;
   let mountTarget = mountPoint;
 
   if (!mountTarget) {
-    if (container instanceof Element) {
+    if (qiankunContainer instanceof Element) {
+      mountTarget = qiankunContainer;
+    } else if (container instanceof Element) {
       let existing = container.querySelector('.app-profile-root');
       if (!existing) {
         existing = document.createElement('div');
@@ -402,6 +407,13 @@ export async function unmount() {
     mountPoint.parentNode.removeChild(mountPoint);
   }
   mountPoint = null;
+
+  if (props.container && props.container.querySelector) {
+    const qiankunRoot = props.container.querySelector('#app');
+    if (qiankunRoot) {
+      qiankunRoot.innerHTML = '';
+    }
+  }
 
   routerInstance = null;
   storeInstance = null;

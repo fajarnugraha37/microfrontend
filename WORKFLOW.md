@@ -94,11 +94,12 @@ This stage ensures a smooth cutover later without touching every repo simultaneo
 1. Remove Qiankun dependencies from shell and apps. Switch the shell to single-spa (`registerApplication`, `start`, `customProps`).
 2. For Vite-based MFEs, load via import maps / native `import()` (e.g., `http://localhost:8082/src/main.js` in dev, hashed `single-spa-entry.js` in prod).
 3. For Vue CLI MFEs, keep Webpack builds but serve bundles via `<script>` / `<link>` tags. Expose lifecycles on `window.<appname>` (`window['app-dashboard-main']`).
-4. Extend the shell loader to support environment overrides (`window.__APP_DASHBOARD_BASE_URL__`, `window.__APP_DASHBOARD_ASSETS__`, `window.__APP_PROFILE_URL__`).
-5. Ensure micro apps still mount/teardown correctly: create/destroy container elements, sync Vuex bridge, push shared state back to shell.
-6. Maintain compatibility shims for any remaining `window.*` consumers (e.g., `window.sharedUtils`, `window.appStoreBridge`). Update docs to track which globals remain, and add teardown in `unmount` when possible.
-7. Update docs (`README`, `PASSING_PROPS.md`, `ASSESSMENT_MICROFRONTEND.md`) to match the new architecture: dev commands (mixed Vite + Vue CLI servers), production asset configuration, state sharing.
-8. Smoke test: `npm run dev`/`npm run serve` for shell, dashboard, profile; verify `/dashboard`, `/profile` load under single-spa. Run `npm run build` per app to confirm bundle outputs.
+4. For Vite-based MFEs that still serve Qiankun hosts, add a second build (e.g., `vite.umd.config.ts`) that emits hashed UMD bundles (`dist-umd/js/app.[hash].js`, `css/app.[hash].css`) while keeping the existing ESM output.
+5. Extend the shell loader to support environment overrides (`window.__APP_DASHBOARD_BASE_URL__`, `window.__APP_DASHBOARD_ASSETS__`, `window.__APP_PROFILE_URL__`).
+6. Ensure micro apps still mount/teardown correctly: create/destroy container elements, sync Vuex bridge, push shared state back to shell.
+7. Maintain compatibility shims for any remaining `window.*` consumers (e.g., `window.sharedUtils`, `window.appStoreBridge`). Update docs to track which globals remain, and add teardown in `unmount` when possible.
+8. Update docs (`README`, `PASSING_PROPS.md`, `ASSESSMENT_MICROFRONTEND.md`, migration reports) to match the new architecture and dual-build strategy.
+9. Smoke test: `npm run dev`/`npm run serve` for shell, dashboard, profile; verify `/dashboard`, `/profile` load under single-spa. Run `npm run build` per app to confirm both ESM and (if applicable) UMD bundles are generated.
 
 ---
 

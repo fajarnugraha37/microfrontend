@@ -36,15 +36,15 @@ This repository demonstrates a Vue microfrontend platform orchestrated by [singl
 Open three terminals (shared library rebuild is optional once built):
 
 ```bash
-# Terminal 1 – shell (single-spa root config, Vite dev server on 8080)
+# Terminal 1 - shell (single-spa root config, Vite dev server on 8080)
 cd common
 npm run dev
 
-# Terminal 2 – dashboard microfrontend (Vue CLI dev server on 8081)
+# Terminal 2 - dashboard microfrontend (Vue CLI dev server on 8081)
 cd app-dashboard
 npm run serve
 
-# Terminal 3 – profile microfrontend (Vite dev server on 8082)
+# Terminal 3 - profile microfrontend (Vite dev server on 8082)
 cd app-profile
 npm run dev -- --port 8082
 ```
@@ -73,7 +73,10 @@ cd app-profile && npm run build
 
 - The shell outputs Vue CLI-style hashed assets plus `dist/index.html`.
 - `app-dashboard` produces a UMD bundle (`dist/js/app.js`) and extracted CSS (`dist/css/app.css`). Host these files on your CDN and configure `window.__APP_DASHBOARD_BASE_URL__` (or `window.__APP_DASHBOARD_ASSETS__`) in the shell to point at the deployed URLs.
-- `app-profile` emits an ES module entry (`dist/single-spa-entry.js`) and a single hashed CSS asset. Update the shell's import map (or `VITE_PROFILE_URL`) for production.
+- `app-profile` emits both:
+  - an ES module entry (`dist/single-spa-entry.js`) alongside hashed JS/CSS assets for single-spa hosts
+  - a Qiankun-compatible UMD bundle with hashed filenames (`dist-umd/js/app.[hash].js`, `dist-umd/css/app.[hash].css`) that exposes `window.appProfile`
+  Publish whichever bundle each orchestrator requires during the gradual cutover.
 - All assets are loaded via standard `<script>` / `<link>` tags or native `import()`—no `eval`, no `new Function`.
 
 ### Configuring Production Asset URLs
@@ -93,6 +96,7 @@ In production you can override the dev-time defaults without rebuilding the shel
     ]
   };
   window.__APP_PROFILE_URL__ = 'https://cdn.example.com/app-profile/single-spa-entry.js';
+  // Legacy Qiankun hosts can continue loading the hashed UMD bundle from dist-umd/.
 </script>
 ```
 
@@ -105,9 +109,9 @@ In production you can override the dev-time defaults without rebuilding the shel
 ```
 common/             # Shell app (Vue 2 + Vite + single-spa root config)
 app-dashboard/      # Dashboard microfrontend (Vue 2, Vue CLI / Webpack UMD bundle)
-app-profile/        # Profile microfrontend (Vue 3 compat, Vite library build)
+app-profile/        # Profile microfrontend (Vue 3 compat, Vite library build + UMD fallback)
 components/         # Shared UI library
 README.md
 ```
 
-Each project retains its native tooling (Vue CLI vs. Vite) while exposing single-spa-friendly entry points so the shell can orchestrate routing, shared state, and utilities without Qiankun.
+Each project retains its native tooling while exposing single-spa-friendly entry points so the shell can orchestrate routing, shared state, and utilities without Qiankun, yet Qiankun-based hosts can still load the legacy bundles during the migration.

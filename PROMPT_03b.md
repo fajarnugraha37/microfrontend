@@ -9,6 +9,7 @@ Goals:
 - Remove Qiankun dependencies from shell and child apps; migrate lifecycle wiring to single-spa (`registerApplication`, `start`, `customProps`).
 - Keep the shell (Vue 2, Vite) responsible for routing, shared Vuex bridge, and global state bus. Provide a Qiankun-compatible facade (`onGlobalStateChange`, `setGlobalState`, etc.) so child apps continue using `$microActions` unchanged.
 - Load Vite-built MFEs (e.g., app-profile) via import maps / native `import()`. Load Vue CLI MFEs (e.g., app-dashboard) via `<script>` / `<link>` tags, exposing single-spa lifecycles on `window.<app-name>`.
+- For Vite microfrontends that still need to serve Qiankun hosts, add a secondary build (e.g., `vite.umd.config.ts`) that emits hashed UMD bundles (`dist-umd/js/app.[hash].js`, `dist-umd/css/app.[hash].css`). Document how long the fallback will be maintained.
 - Ensure the shell supports environment overrides for remote asset URLs (e.g., `window.__APP_DASHBOARD_BASE_URL__`, `window.__APP_DASHBOARD_ASSETS__`, `window.__APP_PROFILE_URL__`) so production deployments can point to CDN-hosted bundles.
 - Update each micro app's entry file to detect single-spa (`window.singleSpaNavigate`) and manage mount/unmount lifecycle (including container creation, teardown, and Vuex bridge syncing).
 - Preserve existing Vuex shared state bridging and shared utilities; confirm that both Vue 2 and Vue 3 compat children still receive working `storeBridge` props.
