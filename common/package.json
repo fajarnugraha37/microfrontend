@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint --ext .js,.vue src"
   },
   "dependencies": {
     "core-js": "^3.8.3",
@@ -17,13 +18,14 @@
     "vuex-persistedstate": "^4.1.0"
   },
   "devDependencies": {
-    "html-webpack-plugin": "^5.6.4",
-    "@vue/cli-plugin-babel": "~4.5.0",
-    "@vue/cli-plugin-eslint": "~4.5.0",
-    "@vue/cli-service": "~4.5.0",
     "babel-eslint": "^10.1.0",
     "eslint": "^7.32.0",
-    "eslint-plugin-vue": "^6.2.2"
+    "eslint-plugin-vue": "^6.2.2",
+    "vite": "^5.4.10",
+    "vite-plugin-vue2": "^2.0.3",
+    "@vitejs/plugin-legacy": "^5.4.2",
+    "@babel/core": "^7.28.5",
+    "@babel/preset-env": "^7.28.4"
   },
   "browserslist": [
     "> 1%",
