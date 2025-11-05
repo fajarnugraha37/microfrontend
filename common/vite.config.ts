@@ -48,24 +48,30 @@ export default defineConfig({
         },
         entryFileNames: (chunk) =>
           chunk.name === 'main'
-            ? `js/app.${HASH_PLACEHOLDER}.js`
-            : `js/[name].${HASH_PLACEHOLDER}.js`,
+            // ? `js/app.${HASH_PLACEHOLDER}.js`
+            ? `js/app.js`
+            // : `js/[name].${HASH_PLACEHOLDER}.js`,
+            : `js/[name].js`,
         chunkFileNames: `js/[name].${HASH_PLACEHOLDER}.js`,
         assetFileNames: (assetInfo) => {
           const ext = path.extname(assetInfo.name || '').slice(1);
           if (ext === 'css') {
-            return `css/app.${HASH_PLACEHOLDER}.css`;
+            // return `css/app.${HASH_PLACEHOLDER}.css`;
+            return `css/app.css`;
           }
 
           if (['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'avif'].includes(ext)) {
-            return `img/[name].${HASH_PLACEHOLDER}[extname]`;
+            // return `img/[name].${HASH_PLACEHOLDER}[extname]`;
+            return `img/[name].[extname]`;
           }
 
           if (['woff', 'woff2', 'ttf', 'otf', 'eot'].includes(ext)) {
-            return `fonts/[name].${HASH_PLACEHOLDER}[extname]`;
+            // return `fonts/[name].${HASH_PLACEHOLDER}[extname]`;
+            return `fonts/[name].[extname]`;
           }
 
-          return `assets/[name].${HASH_PLACEHOLDER}[extname]`;
+          // return `assets/[name].${HASH_PLACEHOLDER}[extname]`;
+          return `assets/[name].[extname]`;
         }
       }
     }

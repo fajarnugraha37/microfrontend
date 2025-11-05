@@ -5,14 +5,18 @@ import path from 'path';
 
 const HASH = '[hash]';
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   base: '/',
   plugins: [
     vue(),
-    legacy({
-      targets: ['defaults', 'not IE 11'],
-      renderLegacyChunks: false
-    })
+    ...(command === 'serve'
+      ? [
+          legacy({
+            targets: ['defaults', 'not IE 11'],
+            renderLegacyChunks: false
+          })
+        ]
+      : [])
   ],
   resolve: {
     alias: {
@@ -63,4 +67,4 @@ export default defineConfig({
       }
     }
   }
-});
+}));
