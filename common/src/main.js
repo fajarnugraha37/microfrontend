@@ -5,6 +5,7 @@ import store from './store';
 import { registerMicroApps, addGlobalUncaughtErrorHandler, start } from 'qiankun';
 import globalActions from './state';
 import * as sharedUtils from './utils';
+import createStoreBridge from './store/bridge';
 
 Vue.config.productionTip = false;
 
@@ -22,6 +23,7 @@ render();
 
 let isSyncingFromGlobal = false;
 let serializedShellStore = JSON.stringify(store.state);
+const storeBridge = createStoreBridge(store);
 
 globalActions.setShellStore(store.state);
 
@@ -60,6 +62,7 @@ const microApps = [
     activeRule: '/dashboard',
     props: {
       sharedUtils: { ...sharedUtils },
+      storeBridge,
       onGlobalStateChange: globalActions.onGlobalStateChange,
       setGlobalState: globalActions.setGlobalState,
       offGlobalStateChange: globalActions.offGlobalStateChange,
@@ -73,6 +76,7 @@ const microApps = [
     activeRule: '/profile',
     props: {
       sharedUtils: { ...sharedUtils },
+      storeBridge,
       onGlobalStateChange: globalActions.onGlobalStateChange,
       setGlobalState: globalActions.setGlobalState,
       offGlobalStateChange: globalActions.offGlobalStateChange,

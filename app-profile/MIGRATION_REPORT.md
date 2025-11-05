@@ -3,7 +3,7 @@
 ## Overview
 
 - **Source toolchain:** Vue CLI 4 (webpack) with `vue.config.js` defining Qiankun-friendly UMD output.
-- **Target toolchain:** Vite 4.5 + `vite-plugin-vue2`, preserving Vue 2 runtime and Qiankun lifecycle exports.
+- **Target toolchain:** Vite 4.5 + `@vitejs/plugin-vue` with Vue 3 compat (`@vue/compat`) and Qiankun lifecycle exports.
 - **Goal:** Keep downstream consumers that hard-link `/js/app.[hash].js` and `/js/chunk-vendors.[hash].js` working while modernising the build.
 
 ## Key Changes
@@ -12,10 +12,11 @@
 | --- | --- | --- |
 | Bundler | `vue-cli-service` (webpack) | `vite@4` (Rollup) |
 | Scripts | `npm run serve`, `vue-cli-service build` | `npm run dev`, `vite build`, `vite preview` |
-| Config | `vue.config.js` | `vite.config.ts` (+ `vite-plugin-qiankun`) |
+| Config | `vue.config.js` | `vite.config.ts` (+ `vite-plugin-qiankun` & Vue 3 compat alias) |
 | Output style | Vue CLI hash pattern | Custom Vite Rollup config mirroring `/js/app.[hash].js`, `/js/chunk-vendors.[hash].js`, `/css/app.[hash].css` |
 | Dev server | webpack-dev-server @ 8082 | Vite dev server @ 8082 with identical CORS headers |
 | Env access | implicit `process.env` shim | `define: { 'process.env': 'import.meta.env' }` |
+| State | Vuex 3 instance | Vuex 4 store created per mount (Vue 3 compatible) |
 | Babel | `@vue/cli-plugin-babel/preset` | `@babel/preset-env` (ES-only transforms; rely on Vite legacy plugin for polyfills) |
 
 ## Output Layout
@@ -48,9 +49,13 @@ This matches the Vue CLI contract so Qiankun registrations that fetch `/js/app.*
 - Output format is `umd` to match Qiankun expectations; `vite-plugin-qiankun` handles runtime glue and HMR in dev (`useDevMode: true`).
 - Vite is pinned to the 4.x line to stay compatible with environments lacking the global `File` constructor (Node < 18).
 - `vite.config.ts` polyfills `globalThis.File` when absent so Undici (used by Vite) does not crash on older Node versions.
-- Removed the old `__webpack_public_path__` guard from `src/main.js`; Vite + `vite-plugin-qiankun` handle public path injection automatically.
-- Alias `@ → src` replicates Vue CLI’s default alias.
+- Alias `@ → src` and `vue → @vue/compat` ensure Vue 3 compat is used everywhere.
+- Vuex store now uses `createStore` from Vuex 4 and is instantiated per mount to avoid cross-qiankun contamination.
 - Babel preset now runs in transform-only mode (no `core-js` runtime); legacy polyfills are injected by `@vitejs/plugin-legacy`.
+- Removed the old `__webpack_public_path__` guard from `src/main.js`; Vite + `vite-plugin-qiankun` handle public path injection automatically.
+- Added `COMPAT_PLAN.md` to track active compat rules, warnings, and follow-up work.
+- Compat flags currently enabled: `MODE`, `GLOBAL_MOUNT`, `GLOBAL_EXTEND`, `GLOBAL_PROTOTYPE`, `INSTANCE_SCOPED_GLOBALS`, `ATTR_FALSE_VALUE`, `INSTANCE_LISTENERS`, `COMPONENT_V_MODEL`, `RENDER_FUNCTION`.
+- Known console warnings: Vue compat `RENDER_FUNCTION`, `INSTANCE_LISTENERS`, and Qiankun `initGlobalState` deprecation (documented in `COMPAT_PLAN.md`).
 
 ## Commands
 

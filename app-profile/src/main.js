@@ -1,13 +1,178 @@
-import Vue from 'vue';
+import { createApp, h } from 'vue';
 import App from './App.vue';
-import router from './router';
-import store from './store';
+import createRouter from './router';
+import createStore from './store';
 
-Vue.config.productionTip = false;
-
-let instance = null;
-let offGlobalStateChange = null;
+let appInstance = null;
+let routerInstance = null;
+let storeInstance = null;
 let isSyncingFromGlobal = false;
+let offGlobalStateChange = null;
+let teardownShellStoreBridge = null;
+let shellStoreFacade = null;
+let bridgeAppInstance = null;
+
+const noop = () => {};
+
+const snapshotsEqual = (a, b) => {
+  if (a === b) {
+    return true;
+  }
+
+  try {
+    return JSON.stringify(a) === JSON.stringify(b);
+  } catch (error) {
+    return false;
+  }
+};
+
+const teardownRemoteShellBridge = () => {
+  if (typeof teardownShellStoreBridge === 'function') {
+    teardownShellStoreBridge();
+    teardownShellStoreBridge = null;
+  }
+
+  if (
+    bridgeAppInstance &&
+    bridgeAppInstance.config &&
+    bridgeAppInstance.config.globalProperties &&
+    bridgeAppInstance.config.globalProperties.$shellStore === shellStoreFacade
+  ) {
+    delete bridgeAppInstance.config.globalProperties.$shellStore;
+  }
+
+  bridgeAppInstance = null;
+  shellStoreFacade = null;
+};
+
+const createShellStoreFacade = (bridge) => {
+  if (!bridge || typeof bridge !== 'object') {
+    return null;
+  }
+
+  return {
+    get state() {
+      if ('state' in bridge) {
+        return bridge.state;
+      }
+      return typeof bridge.getState === 'function' ? bridge.getState() : {};
+    },
+    get getters() {
+      return bridge.getters || {};
+    },
+    getState: () => (typeof bridge.getState === 'function' ? bridge.getState() : {}),
+    commit: (type, payload, options) => {
+      if (typeof bridge.commit === 'function') {
+        return bridge.commit(type, payload, options);
+      }
+      return undefined;
+    },
+    dispatch: (type, payload) => {
+      if (typeof bridge.dispatch === 'function') {
+        return bridge.dispatch(type, payload);
+      }
+      return Promise.resolve();
+    },
+    subscribe: (listener) => {
+      if (typeof bridge.subscribe === 'function') {
+        return bridge.subscribe(listener);
+      }
+      return noop;
+    },
+    watch: (getter, callback, options) => {
+      if (typeof bridge.watch === 'function') {
+        return bridge.watch(getter, callback, options);
+      }
+      return noop;
+    },
+    replaceState: (next) => {
+      if (typeof bridge.replaceState === 'function') {
+        return bridge.replaceState(next);
+      }
+      return undefined;
+    },
+    registerModule: (path, module, options) => {
+      if (typeof bridge.registerModule === 'function') {
+        return bridge.registerModule(path, module, options);
+      }
+      return undefined;
+    },
+    unregisterModule: (path) => {
+      if (typeof bridge.unregisterModule === 'function') {
+        return bridge.unregisterModule(path);
+      }
+      return undefined;
+    },
+    hasModule: (path) => {
+      if (typeof bridge.hasModule === 'function') {
+        return bridge.hasModule(path);
+      }
+      return false;
+    }
+  };
+};
+
+const setupShellStoreBridge = (app, store, bridge) => {
+  teardownRemoteShellBridge();
+
+  if (!bridge || typeof bridge !== 'object' || !store) {
+    return null;
+  }
+
+  const facade = createShellStoreFacade(bridge);
+  shellStoreFacade = facade;
+  bridgeAppInstance = app;
+
+  if (app && app.config && app.config.globalProperties) {
+    app.config.globalProperties.$shellStore = facade;
+  }
+
+  const syncSnapshot = (snapshot) => {
+    if (!snapshot || !store) {
+      return;
+    }
+
+    const current = store.getters.sharedShell || {};
+    if (!snapshotsEqual(current, snapshot)) {
+      isSyncingFromGlobal = true;
+      store.commit('replaceSharedShell', snapshot);
+      isSyncingFromGlobal = false;
+    }
+  };
+
+  if (typeof bridge.getState === 'function') {
+    syncSnapshot(bridge.getState());
+  }
+
+  let unsubscribe = null;
+  if (typeof bridge.subscribe === 'function') {
+    unsubscribe = bridge.subscribe((_mutation, state) => {
+      syncSnapshot(state);
+    });
+  }
+
+  teardownShellStoreBridge = () => {
+    if (typeof unsubscribe === 'function') {
+      unsubscribe();
+    }
+    if (
+      app &&
+      app.config &&
+      app.config.globalProperties &&
+      app.config.globalProperties.$shellStore === facade
+    ) {
+      delete app.config.globalProperties.$shellStore;
+    }
+    if (shellStoreFacade === facade) {
+      shellStoreFacade = null;
+    }
+    if (bridgeAppInstance === app) {
+      bridgeAppInstance = null;
+    }
+  };
+
+  return facade;
+};
 
 const teardownGlobalStateSync = () => {
   if (typeof offGlobalStateChange === 'function') {
@@ -17,49 +182,97 @@ const teardownGlobalStateSync = () => {
 };
 
 const setupGlobalStateSync = (props = {}) => {
-  const { onGlobalStateChange, getGlobalState } = props;
+  const { onGlobalStateChange, getGlobalState, storeBridge } = props;
 
   teardownGlobalStateSync();
 
-  if (typeof onGlobalStateChange === 'function') {
+  if (storeBridge && typeof storeBridge.subscribe === 'function') {
+    return;
+  }
+
+  if (typeof onGlobalStateChange === 'function' && storeInstance) {
     offGlobalStateChange = onGlobalStateChange((state) => {
       if (state && state.shellStore) {
-        const existing = store.getters.sharedShell || {};
+        const existing = storeInstance.getters.sharedShell || {};
         const incoming = state.shellStore;
         const isDifferent = JSON.stringify(existing) !== JSON.stringify(incoming);
         if (isDifferent) {
           isSyncingFromGlobal = true;
-          store.commit('replaceSharedShell', incoming);
+          storeInstance.commit('replaceSharedShell', incoming);
           isSyncingFromGlobal = false;
         }
       }
     }, true);
   }
 
-  if (typeof getGlobalState === 'function') {
+  if (typeof getGlobalState === 'function' && storeInstance) {
     const current = getGlobalState();
     if (current && current.shellStore) {
       isSyncingFromGlobal = true;
-      store.commit('replaceSharedShell', current.shellStore);
+      storeInstance.commit('replaceSharedShell', current.shellStore);
       isSyncingFromGlobal = false;
     }
   }
 };
 
-function render(props = {}) {
+const createMicroApp = (router, store, props = {}) => {
   const {
-    container,
     sharedUtils = {},
     onGlobalStateChange,
     setGlobalState,
-    getGlobalState
+    getGlobalState,
+    storeBridge
   } = props;
 
-  Vue.prototype.$sharedUtils = sharedUtils;
-  Vue.prototype.$microActions = {
+  let shellBridgeFacade = null;
+
+  const app = createApp({
+    render: () =>
+      h(App, {
+        sharedUtils,
+        onGlobalStateChange,
+        setGlobalState,
+        getGlobalState,
+        shellStore: shellBridgeFacade
+      })
+  });
+
+  app.config.compatConfig = {
+    MODE: 2,
+    GLOBAL_MOUNT: true,
+    GLOBAL_EXTEND: true,
+    GLOBAL_PROTOTYPE: true,
+    INSTANCE_SCOPED_GLOBALS: true,
+    ATTR_FALSE_VALUE: true,
+     INSTANCE_LISTENERS: true,
+    COMPONENT_V_MODEL: true,
+    RENDER_FUNCTION: true
+  };
+
+  app.use(router);
+  app.use(store);
+
+  app.config.globalProperties.$sharedUtils = sharedUtils;
+  const resolveShellStore = () =>
+    shellBridgeFacade || storeBridge || app.config.globalProperties.$shellStore || null;
+  app.config.globalProperties.$microActions = {
     onGlobalStateChange,
     setGlobalState,
     getGlobalState,
+    commitToShell(type, payload, options) {
+      const bridge = resolveShellStore();
+      if (bridge && typeof bridge.commit === 'function') {
+        return bridge.commit(type, payload, options);
+      }
+      return undefined;
+    },
+    dispatchToShell(type, payload) {
+      const bridge = resolveShellStore();
+      if (bridge && typeof bridge.dispatch === 'function') {
+        return bridge.dispatch(type, payload);
+      }
+      return Promise.resolve();
+    },
     pushSharedState(partial = {}) {
       const globalState = typeof getGlobalState === 'function' ? getGlobalState() : null;
       const baseState =
@@ -70,6 +283,11 @@ function render(props = {}) {
         store.commit('replaceSharedShell', nextState);
       }
 
+      const bridge = resolveShellStore();
+      if (bridge && typeof bridge.replaceState === 'function') {
+        bridge.replaceState(nextState);
+      }
+
       if (typeof setGlobalState === 'function') {
         setGlobalState({
           shellStore: nextState
@@ -78,25 +296,39 @@ function render(props = {}) {
     }
   };
 
+  shellBridgeFacade = setupShellStoreBridge(app, store, storeBridge);
+
+  return app;
+};
+
+const mountApp = async (props = {}) => {
+  const container = props.container
+    ? props.container.querySelector('#app')
+    : document.querySelector('#app');
+
+  if (!container) {
+    throw new Error('[app-profile] mount container not found');
+  }
+
+  if (appInstance) {
+    appInstance.unmount();
+    appInstance = null;
+  }
+
+  routerInstance = createRouter();
+  storeInstance = createStore();
+  const app = createMicroApp(routerInstance, storeInstance, props);
   setupGlobalStateSync(props);
 
-  instance = new Vue({
-    router,
-    store,
-    render: (h) =>
-      h(App, {
-        props: {
-          sharedUtils,
-          onGlobalStateChange,
-          setGlobalState,
-          getGlobalState
-        }
-      })
-  }).$mount(container ? container.querySelector('#app') : '#app');
-}
+  app.mount(container);
+  if (routerInstance && typeof routerInstance.isReady === 'function') {
+    await routerInstance.isReady();
+  }
+  appInstance = app;
+};
 
 if (!window.__POWERED_BY_QIANKUN__) {
-  render();
+  mountApp();
 }
 
 export async function bootstrap() {
@@ -104,15 +336,18 @@ export async function bootstrap() {
 }
 
 export async function mount(props) {
-  render(props);
+  await mountApp(props);
 }
 
 export async function unmount() {
   teardownGlobalStateSync();
+  teardownRemoteShellBridge();
 
-  if (instance) {
-    instance.$destroy();
-    instance.$el.innerHTML = '';
-    instance = null;
+  if (appInstance) {
+    appInstance.unmount();
+    appInstance = null;
   }
+
+  routerInstance = null;
+  storeInstance = null;
 }

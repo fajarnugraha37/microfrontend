@@ -1,8 +1,7 @@
 import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
 import legacy from '@vitejs/plugin-legacy';
-import { createVuePlugin } from 'vite-plugin-vue2';
-// import qiankun from 'vite-plugin-qiankun';
-import qiankun from "vite-plugin-qiankun-lite";
+import qiankun from 'vite-plugin-qiankun-lite';
 import path from 'path';
 
 const HASH = '[hash]';
@@ -11,12 +10,10 @@ const MICRO_APP_NAME = 'app-profile';
 export default defineConfig({
   base: '/',
   plugins: [
-    createVuePlugin(),
-    // qiankun (MICRO_APP_NAME, {
-    //   useDevMode: true
-    // }),
-    qiankun({ name: MICRO_APP_NAME,
-      sandbox: true,
+    vue(),
+    qiankun({
+      name: MICRO_APP_NAME,
+      sandbox: true
     }),
     legacy({
       targets: ['defaults', 'not IE 11'],
@@ -25,7 +22,8 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src')
+      '@': path.resolve(__dirname, 'src'),
+      vue: '@vue/compat'
     }
   },
   define: {
@@ -50,8 +48,6 @@ export default defineConfig({
     rollupOptions: {
       input: path.resolve(__dirname, 'src/main.js'),
       output: {
-        // format: 'umd',
-        // name: MICRO_APP_NAME,
         manualChunks(id) {
           if (id.includes('node_modules')) {
             return 'chunk-vendors';
