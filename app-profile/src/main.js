@@ -11,6 +11,7 @@ let offGlobalStateChange = null;
 let teardownShellStoreBridge = null;
 let shellStoreFacade = null;
 let bridgeAppInstance = null;
+let mountPoint = null;
 
 const noop = () => {};
 
@@ -226,6 +227,36 @@ const createMicroApp = (router, store, props = {}) => {
 
   let shellBridgeFacade = null;
 
+  const resolveContainer = () => {
+    if (props.container instanceof Element) {
+      return props.container;
+    }
+    if (typeof props.domElementGetter === 'function') {
+      const element = props.domElementGetter();
+      if (element instanceof Element) {
+        return element;
+      }
+    }
+    return document.querySelector('#micro-app-container');
+  };
+
+  const ensureMountPoint = () => {
+    const containerElement = resolveContainer();
+    if (!containerElement) {
+      return null;
+    }
+
+    let target = containerElement.querySelector('.app-profile-root');
+    if (!target) {
+      target = document.createElement('div');
+      target.className = 'app-profile-root';
+      containerElement.innerHTML = '';
+      containerElement.appendChild(target);
+    }
+    mountPoint = target;
+    return target;
+  };
+
   const app = createApp({
     render: () =>
       h(App, {
@@ -233,8 +264,8 @@ const createMicroApp = (router, store, props = {}) => {
         onGlobalStateChange,
         setGlobalState,
         getGlobalState,
-        shellStore: shellBridgeFacade
-      })
+          shellStore: shellBridgeFacade
+        })
   });
 
   app.config.compatConfig = {
@@ -302,11 +333,28 @@ const createMicroApp = (router, store, props = {}) => {
 };
 
 const mountApp = async (props = {}) => {
-  const container = props.container
-    ? props.container.querySelector('#app')
-    : document.querySelector('#app');
+  const container = props.container || (typeof props.domElementGetter === 'function'
+    ? props.domElementGetter()
+    : null);
+  let mountTarget = mountPoint;
 
-  if (!container) {
+  if (!mountTarget) {
+    if (container instanceof Element) {
+      let existing = container.querySelector('.app-profile-root');
+      if (!existing) {
+        existing = document.createElement('div');
+        existing.className = 'app-profile-root';
+        container.innerHTML = '';
+        container.appendChild(existing);
+      }
+      mountTarget = existing;
+      mountPoint = existing;
+    } else {
+      mountTarget = document.querySelector('#app');
+    }
+  }
+
+  if (!mountTarget) {
     throw new Error('[app-profile] mount container not found');
   }
 
@@ -320,14 +368,16 @@ const mountApp = async (props = {}) => {
   const app = createMicroApp(routerInstance, storeInstance, props);
   setupGlobalStateSync(props);
 
-  app.mount(container);
+  const resolvedMount = mountPoint || mountTarget;
+  const finalMount = resolvedMount || document.querySelector('#app');
+  app.mount(finalMount || '#app');
   if (routerInstance && typeof routerInstance.isReady === 'function') {
     await routerInstance.isReady();
   }
   appInstance = app;
 };
 
-if (!window.__POWERED_BY_QIANKUN__) {
+if (!window.singleSpaNavigate) {
   mountApp();
 }
 
@@ -347,6 +397,11 @@ export async function unmount() {
     appInstance.unmount();
     appInstance = null;
   }
+
+  if (mountPoint && mountPoint.parentNode) {
+    mountPoint.parentNode.removeChild(mountPoint);
+  }
+  mountPoint = null;
 
   routerInstance = null;
   storeInstance = null;

@@ -1,20 +1,14 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import legacy from '@vitejs/plugin-legacy';
-import qiankun from 'vite-plugin-qiankun-lite';
 import path from 'path';
 
 const HASH = '[hash]';
-const MICRO_APP_NAME = 'app-profile';
 
 export default defineConfig({
   base: '/',
   plugins: [
     vue(),
-    qiankun({
-      name: MICRO_APP_NAME,
-      sandbox: true
-    }),
     legacy({
       targets: ['defaults', 'not IE 11'],
       renderLegacyChunks: false
@@ -45,20 +39,14 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     cssCodeSplit: false,
+    lib: {
+      entry: path.resolve(__dirname, 'src/main.js'),
+      name: 'appProfile',
+      formats: ['es'],
+      fileName: () => 'single-spa-entry.js'
+    },
     rollupOptions: {
-      input: path.resolve(__dirname, 'src/main.js'),
       output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            return 'chunk-vendors';
-          }
-          return undefined;
-        },
-        entryFileNames: (chunk) =>
-          chunk.name === 'main'
-            ? `js/app.${HASH}.js`
-            : `js/[name].${HASH}.js`,
-        chunkFileNames: `js/[name].${HASH}.js`,
         assetFileNames: (assetInfo) => {
           const ext = path.extname(assetInfo.name || '').slice(1);
           if (ext === 'css') {

@@ -1,14 +1,11 @@
 ## Microfrontend Orchestrator Assessment
 
-### Current State: Qiankun
-- **Strengths**
-  - Provides lifecycle management (`bootstrap`, `mount`, `unmount`) and global state helpers out of the box.
-  - Automatic sandboxing (proxy-based) keeps child globals isolated.
-  - Easy to adopt for Vue 2 MFEs, works with our existing Vue Router/Vuex setup.
-- **Weaknesses**
-  - Relies on `new Function` / `eval` for asset execution; violates CSP policies forbidding script eval.
-  - Limited tooling ecosystem for Vue 3 + Vite builds (bridges exist but add friction).
-  - Debugging sandboxed globals and patched DOM APIs can be tricky.
+### Current State: single-spa + Mixed Bundles
+- **Shell**: Vite-based Vue 2 app orchestrated by single-spa (`common/`).
+- **Dashboard**: Vue CLI/Webpack build that emits a single UMD bundle (`js/app.js`, `css/app.css`) and exposes lifecycles on `window.app-dashboard-main`.
+- **Profile**: Vite/Vue 3 (compat) micro app built as an ES module and imported via an import map.
+- **Communication**: Shell still shares utilities, global state, and the Vuex bridge through single-spa custom props (no Qiankun dependency).
+- **Eval Footprint**: Removed. Assets are loaded via `<script>`/`<link>` tags or native `import()` without relying on `new Function`.
 
 ### Alternative Options
 
@@ -48,12 +45,10 @@
    - **Cons**: Heavier resource cost; URL syncing/routing is complex; limited CSS/layout integration.
    - **Migration Fit**: Low unless security isolation trumps UX needs.
 
-### Recommendation
-**Module Federation** is the most practical replacement if we want to stay bundle-driven and avoid eval: it keeps the shell in charge, leverages modern tooling, and only requires adapting our micro app bootstrap to expose remote modules. We’d pair it with:
-- A shared shell store package (possibly the existing bridge published as a local npm module).
-- A host-side router that lazy-loads remotes via dynamic `import()`.
-- Shared dependency config to avoid duplicate Vue/Vuex copies.
-
-If Module Federation adoption proves too heavy, **single-spa + native ESM** is the next clean option: similar lifecycle semantics, zero eval, but more DIY for shared state/sandboxing.
-
-We should schedule a spike to convert one micro app (e.g., `app-dashboard`) to a Module Federation remote, validate loading from the shell without Qiankun, and measure integration effort before committing to a full migration plan.
+### Current Concerns / Follow-ups
+- Dev UX asymmetry: dashboard must run `vue-cli-service serve` while the shell/profile use Vite; consider docs/scripts to simplify.
+- Vue CLI output currently hard-codes `js/app.js` / `css/app.css`; set up an automated copy/upload step and environment overrides (`window.__APP_DASHBOARD_ASSETS__`) when filenames are hashed in prod.
+- No sandboxing layer; rely on code review/testing to prevent global collisions (classes, styles). Consider CSS prefixes or micro-app-specific root elements.
+- Shared state bus is now an in-memory event emitter (`common/src/state.js`). Validate behaviour across multiple mounts/unmounts and long-lived listeners.
+- Evaluate replacing the dashboard's UMD bundle with an ES module build via Vue CLI 5 (`experiments.outputModule = true`) once we can upgrade the toolchain.
+- Track remaining `window.*` shims (e.g., `window.appStoreBridge`, `window.sharedUtils`) and migrate consumers to module or prop-based access so the globals can be retired.

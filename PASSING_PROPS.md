@@ -1,4 +1,4 @@
-## Vuex Bridge Across Mixed Vue Runtimes
+## Vuex Bridge Across Mixed Vue Runtimes (single-spa, no Qiankun)
 
 ### Why It Works
 
@@ -11,15 +11,19 @@
 - **Serialized Data Avoids Reactive Mismatch**  
   The bridge clones payloads via `JSON.stringify`/`JSON.parse` before passing state to consumers. Each microfrontend therefore receives plain objects/arrays, not Vue-observed data. Both Vue 2 and Vue 3 can hydrate the same POJOs without tripping over each other’s reactivity systems.
 
-- **Qiankun Prop Pipeline Is Version-Blind**  
-  Qiankun passes `storeBridge` to micro apps as an opaque prop. It doesn’t inspect Vue internals, so different Vue runtimes can coexist; they just get a reference to a JavaScript object.
+- **single-spa Custom Props Are Framework-Neutral**  
+  The shell passes `storeBridge`, shared utils, and the global-state bus via single-spa `customProps`. single-spa simply forwards the object handed to it—it never inspects Vue internals—so Vue 2 and Vue 3 runtimes consume the same JavaScript contract.
 
 - **Local Stores Stay Local**  
   Each micro app mounts its own Vuex store for UI state and consumes the bridge explicitly (e.g., `this.$microActions.dispatchToShell('logout')`). This keeps runtime-specific reactivity inside each app while still allowing cross-app mutations.
 
 - **Clean Teardown Prevents Leaks**  
-  Bridge subscriptions (`storeBridge.subscribe`, `storeBridge.watch`) are tracked and disposed in Qiankun’s `unmount`. There are no lingering watchers tied to Vue 2 or Vue 3 lifecycles, so unmounting one runtime doesn’t destabilize the other.
+  Bridge subscriptions (`storeBridge.subscribe`, `storeBridge.watch`) are tracked in the host. The shell and both micro apps call `.teardown()` during single-spa `unmount`, so there are no lingering watchers across Vue runtimes.
+- **Fallback Global State Bus**  
+  We replicated Qiankun's `initGlobalState` API with an in-process event emitter (`common/src/state.js`). Child apps still interact through `$microActions.onGlobalStateChange` / `setGlobalState` without caring that the underlying implementation changed.
+- **Optional Window Shims**  
+  For legacy code that still expects `window.sharedUtils` or `window.appStoreBridge`, the shell exposes these globals right after registering single-spa apps and removes them on teardown. New code paths should prefer injected props, but the shim keeps partially migrated repos functional.
 
 ### Practical Takeaway
 
-Passing the shell’s Vuex context through Qiankun props works even while the shell (Vue 2) and `app-profile` (Vue 3 compat) are on different Vue versions because the boundary is defined purely in terms of Vuex’s stable, framework-agnostic API and plain JavaScript data structures. Each micro app opts into the bridge when it needs shared state, and the shared contract stays valid until we eventually graduate everything to a single Vue runtime.
+Passing the shell's Vuex context via single-spa custom props works even while the shell (Vue 2) and `app-profile` (Vue 3 compat) target different Vue versions because the boundary is still defined purely in terms of Vuex's stable, framework-agnostic API and plain JavaScript data structures. Each micro app opts into the bridge when it needs shared state, and the contract survives the move away from Qiankun since single-spa simply forwards the same objects.
