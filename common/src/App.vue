@@ -4,11 +4,11 @@
       <h1 class="layout__title">Common Shell</h1>
       <nav class="layout__nav">
         <router-link to="/">Home</router-link>
-        <router-link to="/login-page">Login</router-link>
-        <router-link to="/users">Users</router-link>
-        <router-link to="/products">Product Search</router-link>
-        <router-link to="/dashboard">Dashboard</router-link>
-        <router-link to="/profile">Profile</router-link>
+        <router-link v-if="!isAuthenticated" to="/login">Login</router-link>
+        <router-link v-if="isAuthenticated" to="/users">Users</router-link>
+        <router-link v-if="isAuthenticated" to="/products">Product Search</router-link>
+        <router-link v-if="isAuthenticated" to="/dashboard">Dashboard</router-link>
+        <router-link v-if="isAuthenticated" to="/profile">Profile</router-link>
       </nav>
       <div class="layout__auth">
         <span v-if="isAuthenticated">Welcome, {{ username }}</span>
@@ -54,19 +54,23 @@ export default {
       };
 
       this.$store.dispatch('login', payload);
+      localStorage.setItem('auth_token', payload.token);
       globalActions.setGlobalState({
         user: payload.user,
         token: payload.token,
         lastLogin: payload.user.lastLogin
       });
+      this.$router.push('/');
     },
     logout() {
       this.$store.dispatch('logout');
+      localStorage.removeItem('auth_token');
       globalActions.setGlobalState({
         user: null,
         token: null,
         lastLogin: null
       });
+      this.$router.push('/login');
     }
   },
   mounted() {

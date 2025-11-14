@@ -2,7 +2,6 @@ import Home from '../views/Home.vue';
 import Login from '../views/Login.vue';
 import Users from '../views/Users.vue';
 import ProductView from '../views/ProductView.vue';
-import LoginPage from '../views/LoginPage.vue';
 import MicroAppHost from '../modules/MicroAppHost.vue';
 
 /** @type {import('vue-router').RouteConfig[]} */
@@ -16,11 +15,6 @@ export const routes = [
     path: '/login',
     name: 'login',
     component: Login
-  },
-  {
-    path: '/login-page',
-    name: 'login-page',
-    component: LoginPage
   },
   {
     path: '/users',
