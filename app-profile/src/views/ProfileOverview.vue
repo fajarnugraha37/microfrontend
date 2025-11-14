@@ -1,12 +1,8 @@
 <template>
   <article class="profile-overview">
     <h3>Overview</h3>
-    <p v-if="user">
-      <strong>{{ user.name }}</strong>'s profile. Last login:
-      <span v-if="sharedUtils.formatDate">
-        {{ sharedUtils.formatDate(user.lastLogin || new Date()) }}
-      </span>
-      <span v-else>{{ user.lastLogin }}</span>
+    <p v-if="isAuthenticated">
+      <strong>{{ username }}</strong>'s profile. 
     </p>
     <p v-else>
       Login from the shell to load profile data.
@@ -42,6 +38,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['isAuthenticated', 'username']),
     ...mapGetters(['profile']),
     user() {
       return this.sharedShell && this.sharedShell.user ? this.sharedShell.user : null;
