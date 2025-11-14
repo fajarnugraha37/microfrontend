@@ -1,7 +1,6 @@
 /**
  * Mixin to load config.json and inject to store
  */
-import loadConfig from '../utils/configLoader';
 export default {
   data() {
     return {
@@ -12,7 +11,7 @@ export default {
   async created() {
     if (!this.configLoaded) {
       try {
-        const cfg = await loadConfig();
+        const cfg = await this.$utils.loadConfig();
         this.config = cfg;
         this.configLoaded = true;
         if (this.$store) {

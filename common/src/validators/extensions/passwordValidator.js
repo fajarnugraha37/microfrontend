@@ -1,5 +1,5 @@
 export default function(value) {
-  // Example: at least 8 chars, 1 number, 1 uppercase
+  // Require at least 8 characters, any type
   if (!value) return false;
-  return /^(?=.*[A-Z])(?=.*\d).{8,}$/.test(value);
+  return value.length >= 8;
 }

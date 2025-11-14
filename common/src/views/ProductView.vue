@@ -11,13 +11,12 @@
   </div>
 </template>
 <script>
-import productMixin from '../mixins/productMixin';
 import ProductDetail from '../components/ProductDetail.vue';
 import ProductSearch from '../components/ProductSearch.vue';
 
 export default {
   name: 'ProductView',
-  mixins: [productMixin],
+  mixins: [],
   components: {
     ProductDetail,
     ProductSearch,

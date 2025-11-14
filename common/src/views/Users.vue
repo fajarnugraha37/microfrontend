@@ -31,7 +31,6 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
-import { checkPermissions } from '../utils';
 
 export default {
   name: 'UsersView',
@@ -39,7 +38,7 @@ export default {
     ...mapGetters(['isAuthenticated']),
     ...mapState(['user']),
     canManageUsers() {
-      return checkPermissions(this.user, 'manage-users');
+      return this.$utils.checkPermissions(this.user, 'manage-users');
     },
     demoUsers() {
       return [

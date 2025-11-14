@@ -24,7 +24,7 @@
 
 <script>
 export default {
-  name: 'MicroAppHost'
+  name: 'MicroAppHost',
 };
 </script>
 

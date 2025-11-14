@@ -23,11 +23,9 @@
   </div>
 </template>
 <script>
-import productMixin from '../mixins/productMixin';
-import configMixin from '../mixins/configMixin';
 export default {
   name: 'ProductList',
-  mixins: [productMixin, configMixin],
+  mixins: [],
   created() {
     this.fetchProducts();
   }

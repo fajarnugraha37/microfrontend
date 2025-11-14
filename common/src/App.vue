@@ -31,7 +31,6 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import globalActions from './state';
 import { CButton } from 'mfe-components';
 
 export default {
@@ -39,6 +38,7 @@ export default {
   components: {
     CButton
   },
+  mixins: [],
   computed: {
     ...mapGetters(['isAuthenticated', 'username'])
   },
@@ -52,35 +52,22 @@ export default {
         },
         token: 'demo-token-123'
       };
-
-      this.$store.dispatch('login', payload);
-      localStorage.setItem('auth_token', payload.token);
-      globalActions.setGlobalState({
-        user: payload.user,
-        token: payload.token,
-        lastLogin: payload.user.lastLogin
-      });
+      this.unifiedLogin(payload);
       this.$router.push('/');
     },
     logout() {
-      this.$store.dispatch('logout');
-      localStorage.removeItem('auth_token');
-      globalActions.setGlobalState({
-        user: null,
-        token: null,
-        lastLogin: null
-      });
+      this.unifiedLogout();
       this.$router.push('/login');
     }
   },
   mounted() {
-    const { user, token } = this.$store.state;
-    if (user && token) {
-      globalActions.setGlobalState({
-        user,
-        token,
-        lastLogin: user.lastLogin || null
+    if (this.user && this.token) {
+      this.setGlobalState({
+        user: this.user,
+        token: this.token,
+        lastLogin: this.user.lastLogin || null
       });
+      this.syncAuthToLocalStorage();
     }
   }
 };

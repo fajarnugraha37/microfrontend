@@ -14,18 +14,21 @@ import sgNumberValidator from "./extensions/sgNumberValidator";
 // dictionary
 import dictionary from "./dictionary";
 
-// Vue use vee-validate package
-window.Vue.use(VeeValidate);
+export const useValidators = (vue) => {
+    // Vue use vee-validate package
+    vue.use(VeeValidate);
 
-Validator.localize(dictionary);
+    Validator.localize(dictionary);
 
-// Extend validator to use custom validator rule
-Validator.extend("validPassword", passwordValidator);
-Validator.extend("fileNumber", fileNumberValidator);
-Validator.extend("fileSize", fileSizeValidator);
-Validator.extend("fileFormat", fileFormatValidator);
-Validator.extend("nric", nricValidator);
-Validator.extend("fin", finValidator);
-Validator.extend("uen", uenValidator);
-Validator.extend("nric_fin", nricFinValidator);
-Validator.extend("sgNumber", sgNumberValidator);
+    // Extend validator to use custom validator rule
+    Validator.extend("validPassword", passwordValidator);
+    Validator.extend("fileNumber", fileNumberValidator);
+    Validator.extend("fileSize", fileSizeValidator);
+    Validator.extend("fileFormat", fileFormatValidator);
+    Validator.extend("nric", nricValidator);
+    Validator.extend("fin", finValidator);
+    Validator.extend("uen", uenValidator);
+    Validator.extend("nric_fin", nricFinValidator);
+    Validator.extend("sgNumber", sgNumberValidator);
+
+}

@@ -2,7 +2,6 @@
   <div class="product-search-container">
     <input
       v-model="query"
-      @input="onSearch"
       class="product-search-input"
       placeholder="Search products..."
       autocomplete="off"
@@ -17,7 +16,7 @@
         <div class="product-search-card-content">
           <h3 class="product-search-card-title">{{ product.title }}</h3>
           <div class="product-search-card-meta">
-            <span class="product-search-card-price">{{ formatPrice(product.price) }}</span>
+            <span class="product-search-card-price">{{ $utils.formatPrice(product.price) }}</span>
             <span class="product-search-card-brand">{{ product.brand }}</span>
           </div>
           <button class="product-search-card-btn" @click="$emit('select-product', product.id)">View Details</button>
@@ -27,12 +26,10 @@
     <div v-else-if="query && !loading && !error" class="product-search-empty">No products found.</div>
   </div>
 </template>
-<script>
-import productMixin from '../mixins/productMixin';
-import formatPrice from '../utils/formatPrice';
+<script> 
 export default {
   name: 'ProductSearch',
-  mixins: [productMixin],
+  mixins: [],
   data() {
     return {
       query: '',
@@ -60,14 +57,15 @@ export default {
       }
       this.loading = false;
     },
+    // Debounce: only call after user stops typing for interval
     debounce(fn, delay) {
       let timeout;
       return function(...args) {
+        const context = this;
         clearTimeout(timeout);
-        timeout = setTimeout(() => fn.apply(this, args), delay);
+        timeout = setTimeout(() => fn.apply(context, args), delay);
       };
     },
-    formatPrice
   },
   watch: {
     query() {

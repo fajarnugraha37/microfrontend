@@ -14,19 +14,28 @@ export const createAxiosInstance = (config) => {
         timeout: config.timeout || 10000,
     });
 
-    _instance.interceptors.request.use((config) => {
-        // You can add authorization headers or other custom logic here
-        const token = localStorage.getItem('auth_token');
-        if (token) {
-            config.headers['Authorization'] = `Bearer ${token}`;
-        }
-        // log request like nginx access log with format ---> HTTP %method %completeUrl %queryParameters
-        console.log('---> HTTP ',
-            config.method.toUpperCase(),
-            ' ', config.url,
-            ' ', JSON.stringify(config.params || {}));
-        return config;
-    });
+        _instance.interceptors.request.use((config) => {
+                // Use Vuex store for token retrieval
+                let token = null;
+                if (window && window.__VUE_DEVTOOLS_GLOBAL_HOOK__ && window.__VUE_DEVTOOLS_GLOBAL_HOOK__.Vue) {
+                    const Vue = window.__VUE_DEVTOOLS_GLOBAL_HOOK__.Vue;
+                    if (Vue && Vue.prototype && Vue.prototype.$store) {
+                        token = Vue.prototype.$store.state.token || null;
+                    }
+                }
+                if (!token && typeof window !== 'undefined') {
+                    token = window.localStorage.getItem('auth_token');
+                }
+                if (token) {
+                        config.headers['Authorization'] = `Bearer ${token}`;
+                }
+                // log request like nginx access log with format ---> HTTP %method %completeUrl %queryParameters
+                console.log('---> HTTP ',
+                        config.method.toUpperCase(),
+                        ' ', config.url,
+                        ' ', JSON.stringify(config.params || {}));
+                return config;
+        });
 
     _instance.interceptors.response.use(
         (response) => {

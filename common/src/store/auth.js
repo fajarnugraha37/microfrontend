@@ -1,14 +1,13 @@
 import { AuthService } from '../services/auth';
 
 const state = {
-  token: localStorage.getItem('auth_token') || '',
+  token: '', // Only set from Vuex mutations/actions
   user: null,
 };
 
 const mutations = {
   setToken(state, token) {
     state.token = token;
-    localStorage.setItem('auth_token', token);
   },
   setUser(state, user) {
     state.user = user;
@@ -30,7 +29,6 @@ const actions = {
   logout({ commit }) {
     commit('setToken', '');
     commit('setUser', null);
-    localStorage.removeItem('auth_token');
   },
 };
 

@@ -4,11 +4,13 @@
       <h2 class="login-title">Login</h2>
       <div class="login-field">
         <label for="username">Username</label>
-        <input v-model="username" id="username" type="text" required class="login-input" />
+        <input v-model="username" id="username" name="username" type="text" v-validate="'required|alpha_num'" data-vv-as="Username" class="login-input" />
+        <span v-show="errors.has('username')" class="login-error">{{ errors.first('username') }}</span>
       </div>
       <div class="login-field">
         <label for="password">Password</label>
-        <input v-model="password" id="password" type="password" required class="login-input" />
+        <input v-model="password" id="password" name="password" type="password" v-validate="'required|min:8|validPassword'" data-vv-as="Password" class="login-input" autocomplete="new-password" />
+        <span v-show="errors.has('password')" class="login-error">{{ errors.first('password') }}</span>
       </div>
       <button type="submit" class="login-btn">Login</button>
       <div v-if="error" class="login-error">{{ error }}</div>
@@ -17,8 +19,15 @@
 </template>
 <script>
 import { AuthService } from '../services/auth';
+import VeeValidate from 'vee-validate';
+import '../validators';
 export default {
   name: 'LoginForm',
+  mounted() {
+    if (!this.$validator) {
+      this.$options._base.use(VeeValidate);
+    }
+  },
   data() {
     return {
       username: '',
@@ -28,6 +37,8 @@ export default {
   },
   methods: {
     async onLogin() {
+      const valid = await this.$validator.validateAll();
+      if (!valid) return;
       try {
         const service = AuthService();
         const res = await service.login({ username: this.username, password: this.password });

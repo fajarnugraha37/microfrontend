@@ -2,7 +2,7 @@
   <div v-if="product" class="product-detail-card">
     <div class="product-detail-header">
       <h2 class="product-detail-title">{{ product.title }}</h2>
-      <span class="product-detail-price">{{ formatPrice(product.price) }}</span>
+      <span class="product-detail-price">{{ $utils.formatPrice(product.price) }}</span>
     </div>
     <div v-if="product.images && product.images.length" class="product-detail-images">
       <img v-for="img in product.images" :src="img" :key="img" class="product-detail-image" :alt="product.title" />
@@ -19,11 +19,9 @@
 </template>
 
 <script>
-import productMixin from '../mixins/productMixin';
-import formatPrice from '../utils/formatPrice';
 export default {
   name: 'ProductDetail',
-  mixins: [productMixin],
+  mixins: [],
   props: ['id'],
   created() {
     if (this.id) {
@@ -38,7 +36,6 @@ export default {
     }
   },
   methods: {
-    formatPrice
   }
 };
 </script>
