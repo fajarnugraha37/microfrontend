@@ -44,8 +44,6 @@ export async function mount(props) {
 }
 
 export async function unmount() {
-  teardownGlobalStateSync();
-
   if (instance) {
     instance.$destroy();
     instance.$el.innerHTML = '';

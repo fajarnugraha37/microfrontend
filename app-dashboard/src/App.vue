@@ -2,11 +2,8 @@
   <div class="dashboard-app">
     <header class="dashboard-app__header">
       <h2>Dashboard Microfrontend</h2>
-      <div class="dashboard-app__user" v-if="user">
-        Welcome, {{ user.name }}
-        <span v-if="user.lastLogin">
-          · Last login: {{ formattedLastLogin }}
-        </span>
+      <div class="dashboard-app__user" v-if="isAuthenticated">
+        Welcome, {{ username }}
       </div>
       <div class="dashboard-app__user" v-else>
         No user detected. Please login from the shell.
@@ -43,7 +40,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['sharedShell', 'sharedUser']),
+    ...mapGetters(['isAuthenticated', 'username']),
     user() {
       return this.sharedUser;
     },
