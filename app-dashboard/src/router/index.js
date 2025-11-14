@@ -1,14 +1,12 @@
-import Vue from 'vue';
-import Router from 'vue-router';
 import DashboardHome from '../views/DashboardHome.vue';
 import DashboardDetails from '../views/DashboardDetails.vue';
 import DashboardSettings from '../views/DashboardSettings.vue';
 
-Vue.use(Router);
+window.Vue.use(window.VueRouter);
 
 const base = window.__POWERED_BY_QIANKUN__ ? '/dashboard' : '/';
 
-const router = new Router({
+const router = new window.VueRouter({
   mode: 'history',
   base,
   routes: [

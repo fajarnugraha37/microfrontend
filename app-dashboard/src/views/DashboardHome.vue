@@ -59,7 +59,7 @@ export default {
   computed: {
     ...mapGetters(['stats']),
     user() {
-      return this.sharedShell && this.sharedShell.user ? this.sharedShell.user : null;
+      return this.$store.state.user;
     }
   },
   methods: {

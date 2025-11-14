@@ -1,9 +1,9 @@
-import Vue from 'vue';
-import Vuex from 'vuex';
+window.Vue.use(window.Vuex);
 
-Vue.use(Vuex);
-
-export default new Vuex.Store({
+/**
+ * @type {import('vuex').Store} parentVuex 
+ */
+export const appDashboardStore = new window.Vuex.Store({
   state: {
     stats: {
       totalUsers: 1280,
@@ -23,9 +23,30 @@ export default new Vuex.Store({
     }
   },
   getters: {
-    stats: (state) => state.stats,
-    sharedShell: (state) => state.sharedShell,
-    sharedUser: (state) =>
+    stats: (state) => {
+      return () => state.stats;
+    },
+    sharedShell: (state) => () => state.sharedShell,
+    sharedUser: (state) => () =>
       state.sharedShell && state.sharedShell.user ? state.sharedShell.user : null
   }
 });
+
+
+export const store = {
+  /**
+   * @param {import('vuex').Store} parentVuex 
+   */
+  attachModule: (parentVuex) => {
+    parentVuex.registerModule("dashboard", appDashboardStore);
+    store.value = parentVuex;
+  },
+  /**
+   * @param {import('vuex').Store} parentVuex 
+   */
+  detachModule: (parentVuex) => {
+    parentVuex.unregisterModule("dashboard");
+    store.value = null;
+  },
+  value: null
+};
