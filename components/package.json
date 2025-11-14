@@ -8,6 +8,12 @@
     "dist",
     "src"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/mfe-components.common.js",
+      "require": "./dist/mfe-components.umd.js"
+    }
+  },
   "scripts": {
     "serve": "vue-cli-service serve --target lib --name mfe-components ./src/index.js",
     "build": "vue-cli-service build --target lib --name mfe-components ./src/index.js",
