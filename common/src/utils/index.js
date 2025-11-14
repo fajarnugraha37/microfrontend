@@ -24,9 +24,9 @@ export const utils = {
 };
 
 export const useUtilities = (vue) => {
-  vue.use({
+  vue.use(new class UtilitiesPlugin {
     install(Vue) {
       Vue.prototype.$utils = utils;
-    },
+    }
   })
 }

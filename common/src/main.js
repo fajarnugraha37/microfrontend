@@ -31,5 +31,13 @@ const app = (() => {
 })();
 
 useQiankun();
-
+console.log('[main] Vue Computed', window.Vue.options.computed);
+console.log('[main] Vue Directives', window.Vue.options.directives);
+console.log('[main] Vue Filters', window.Vue.options.filters);
+console.log('[main] Vue Methods', window.Vue.options.methods);
+console.log('[main] Vue Installed Plugins', window.Vue.options._base._installedPlugins);
+console.log('[main] App Methods', app.$options.methods);
+console.log('[main] App Store', app.$store);
+console.log('[main] App Validator', app.$validator);
+console.log('[main] App Utils', app.$utils);
 export default app;
