@@ -2,8 +2,8 @@
   <div class="profile-app">
     <header class="profile-app__header">
       <h2>Profile Microfrontend</h2>
-      <div class="profile-app__user" v-if="user">
-        Viewing profile for <strong>{{ user.name }}</strong>
+      <div class="profile-app__user" v-if="isAuthenticated">
+        Viewing profile for <strong>{{ username }}</strong>
       </div>
       <div class="profile-app__user" v-else>
         Awaiting authentication from shell...
@@ -40,7 +40,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['sharedShell', 'sharedUser']),
+    ...mapGetters(['isAuthenticated', 'username']),
     user() {
       return this.sharedUser;
     }

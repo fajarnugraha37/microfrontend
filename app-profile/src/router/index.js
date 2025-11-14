@@ -1,14 +1,12 @@
-import Vue from 'vue';
-import Router from 'vue-router';
 import ProfileOverview from '../views/ProfileOverview.vue';
 import ProfileActivity from '../views/ProfileActivity.vue';
 import ProfileSettings from '../views/ProfileSettings.vue';
 
-Vue.use(Router);
+window.Vue.use(window.VueRouter);
 
 const base = window.__POWERED_BY_QIANKUN__ ? '/profile' : '/';
 
-const router = new Router({
+const router = new window.VueRouter({
   mode: 'history',
   base,
   routes: [
