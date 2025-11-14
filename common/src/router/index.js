@@ -10,4 +10,16 @@ const router = new Router({
   routes: routes,
 });
 
+
+// Navigation guard for auth
+router.beforeEach((to, from, next) => {
+  const requiresAuth = to.matched.some(record => record.meta && record.meta.requiresAuth);
+  const token = localStorage.getItem('auth_token');
+  if (requiresAuth && !token) {
+    next({ path: '/login', query: { redirect: to.fullPath } });
+  } else {
+    next();
+  }
+});
+
 export default router;

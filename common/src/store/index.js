@@ -7,7 +7,8 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     token: null,
-    user: null
+    user: null,
+    config: null
   },
   mutations: {
     setUser(state, user) {
@@ -19,6 +20,9 @@ export default new Vuex.Store({
     resetAuth(state) {
       state.user = null;
       state.token = null;
+    },
+    setConfig(state, config) {
+      state.config = config;
     }
   },
   actions: {
@@ -32,12 +36,13 @@ export default new Vuex.Store({
   },
   getters: {
     isAuthenticated: (state) => Boolean(state.token),
-    username: (state) => (state.user ? state.user.name : '')
+    username: (state) => (state.user ? state.user.name : ''),
+    config: (state) => state.config
   },
   plugins: [
     createPersistedState({
       key: 'common-shell',
-      paths: ['token', 'user']
+      paths: ['token', 'user', 'config']
     })
   ]
 });

@@ -1,0 +1,46 @@
+{
+    "apiBaseUrl": "https://aceas-inter.dev.xtremax.com",
+    "idpCookieName": "ui-internet-client",
+    "idpAuthority": "https://aceas-inter.dev.xtremax.com/aceas/auth/realms/aceas-internet-dev",
+    "idpClientId": "aceas-dev",
+    "idpRedirectUri": "http://localhost:8080/aceas/oidccallback",
+    "idpPostLogoutRedirectUri": "http://localhost:8080/aceas/logoutcallback",
+    "idpSilentRedirectUri": "http://localhost:8080/aceas/silentrenewcallback",
+    "idpResponseType": "code",
+    "idpScope": "openid",
+    "googleSearchId": "https://cse.google.com/cse.js?cx=9791948f46fe16b00",
+    "idpSessionIdleTime": 600000,
+    "idpMaxAbsoluteSession": 3600000,
+    "idpBeforeAbsoluteSessionNotificationTime": 300000,
+    "idpSilentReqTimeout": 300000,
+    "version": 1,
+    "wogaaTrackingId": {
+        "eServices": "CEA-1026",
+        "complaint": "CEA-1028"
+    },
+    "googleReCaptchaSiteKey": "6LfcaxwbAAAAAA_5jW7n1rzXyd1OB8_xdsYBveya",
+    "environment": "dev",
+    "maintenanceInfo": [
+        {
+            "path": "/",
+            "isUnderMaintenance": false,
+            "text": "The Home is undergoing maintenance on 15 October 2020, 2.00pm to 16 October 2020, 1.00am. Thank you for your patience."
+        },
+        {
+            "path": "/public-register*",
+            "isUnderMaintenance": false,
+            "text": "The Public Register is undergoing maintenance on 15 October 2020, 2.00pm to 16 October 2020, 1.00am. Thank you for your patience."
+        },
+        {
+            "path": "/suspended-or-revoked-salespersons-&-estate-agents*",
+            "isUnderMaintenance": false,
+            "text": "The Public Register is undergoing maintenance on 15 October 2020, 2.00pm to 16 October 2020, 1.00am. Thank you for your patience."
+        },
+        {
+            "path": "/feedback-management*",
+            "isUnderMaintenance": false,
+            "text": "The Feedback Management is undergoing maintenance on 15 October 2020, 2.00pm to 16 October 2020, 1.00am. Thank you for your patience."
+        }
+    ],
+    "idpRenewAccessTokenMs": 30000
+}

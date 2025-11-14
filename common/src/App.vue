@@ -4,7 +4,9 @@
       <h1 class="layout__title">Common Shell</h1>
       <nav class="layout__nav">
         <router-link to="/">Home</router-link>
+        <router-link to="/login-page">Login</router-link>
         <router-link to="/users">Users</router-link>
+        <router-link to="/products">Product Search</router-link>
         <router-link to="/dashboard">Dashboard</router-link>
         <router-link to="/profile">Profile</router-link>
       </nav>

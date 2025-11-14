@@ -1,6 +1,8 @@
 import Home from '../views/Home.vue';
 import Login from '../views/Login.vue';
 import Users from '../views/Users.vue';
+import ProductView from '../views/ProductView.vue';
+import LoginPage from '../views/LoginPage.vue';
 import MicroAppHost from '../modules/MicroAppHost.vue';
 
 /** @type {import('vue-router').RouteConfig[]} */
@@ -16,28 +18,48 @@ export const routes = [
     component: Login
   },
   {
+    path: '/login-page',
+    name: 'login-page',
+    component: LoginPage
+  },
+  {
     path: '/users',
     name: 'users',
-    component: Users
+    component: Users,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/products',
+    name: 'products',
+    component: ProductView
+  },
+  {
+    path: '/products/:id',
+    name: 'product-detail',
+    component: ProductView
   },
   {
     path: '/dashboard',
     name: 'dashboard-root',
-    component: MicroAppHost
+    component: MicroAppHost,
+    meta: { requiresAuth: true }
   },
   {
     path: '/dashboard/:path*',
     name: 'dashboard-mfe',
-    component: MicroAppHost
+    component: MicroAppHost,
+    meta: { requiresAuth: true }
   },
   {
     path: '/profile',
     name: 'profile-root',
-    component: MicroAppHost
+    component: MicroAppHost,
+    meta: { requiresAuth: true }
   },
   {
     path: '/profile/:path*',
     name: 'profile-mfe',
-    component: MicroAppHost
+    component: MicroAppHost,
+    meta: { requiresAuth: true }
   }
 ];

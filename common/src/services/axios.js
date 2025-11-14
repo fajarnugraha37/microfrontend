@@ -1,5 +1,4 @@
-import { Axios } from 'axios';
-
+import axios, { Axios } from 'axios';
 
 /**
  * 
@@ -10,7 +9,7 @@ import { Axios } from 'axios';
  * @returns {Axios}
  */
 export const createAxiosInstance = (config) => {
-    const _instance = new Axios({
+    const _instance = axios.create({
         baseURL: config.baseURL || 'http://localhost:3000/api',
         timeout: config.timeout || 10000,
     });
