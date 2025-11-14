@@ -2,7 +2,7 @@ import Vue from 'vue';
 import App from './App.vue';
 import router from './router';
 import store from './store';
-import { registerApplication, addErrorHandler, start } from 'single-spa';
+import { addGlobalUncaughtErrorHandler, loadMicroApp, start } from 'qiankun';
 import globalActions from './state';
 import * as sharedUtils from './utils';
 import createStoreBridge from './store/bridge';
@@ -54,76 +54,6 @@ store.subscribe((mutation, state) => {
   }
 });
 
-const loadedScripts = new Map();
-const loadedStyles = new Map();
-
-const loadScript = (url) => {
-  if (!url) {
-    return Promise.resolve();
-  }
-
-  if (loadedScripts.has(url)) {
-    return loadedScripts.get(url);
-  }
-
-  const promise = new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${url}"]`)) {
-      resolve();
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.src = url;
-    script.onload = () => resolve();
-    script.onerror = (event) => reject(event?.error || new Error(`Failed to load script ${url}`));
-    document.head.appendChild(script);
-  });
-
-  loadedScripts.set(url, promise);
-  return promise;
-};
-
-const loadStyle = (url) => {
-  if (!url) {
-    return Promise.resolve();
-  }
-
-  if (loadedStyles.has(url)) {
-    return loadedStyles.get(url);
-  }
-
-  const promise = new Promise((resolve, reject) => {
-    if (document.querySelector(`link[href="${url}"]`)) {
-      resolve();
-      return;
-    }
-
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = url;
-    link.onload = () => resolve();
-    link.onerror = () => reject(new Error(`Failed to load stylesheet ${url}`));
-    document.head.appendChild(link);
-  });
-
-  loadedStyles.set(url, promise);
-  return promise;
-};
-
-const loadUmdMicroApp = async (assets) => {
-  if (!assets) {
-    return;
-  }
-
-  const { styles = [], scripts = [] } = assets;
-  await Promise.all(styles.map((styleUrl) => loadStyle(styleUrl)));
-
-  for (const scriptUrl of scripts) {
-    // eslint-disable-next-line no-await-in-loop
-    await loadScript(scriptUrl);
-  }
-};
-
 const envDashboardUrl =
   typeof import.meta !== 'undefined' && import.meta.env
     ? import.meta.env.VITE_DASHBOARD_URL
@@ -139,46 +69,177 @@ const dashboardAssets =
     scripts: [`${DASHBOARD_BASE_URL}/js/app.js`]
   }))();
 
+const getEnvProfileModule = () => {
+  if (window.__APP_PROFILE_URL__) {
+    return window.__APP_PROFILE_URL__;
+  }
+  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_PROFILE_URL) {
+    return import.meta.env.VITE_PROFILE_URL;
+  }
+  return 'app-profile';
+};
+
+const getProfileAssetFallback = () => {
+  const base =
+    window.__APP_PROFILE_BASE_URL__ ||
+    (typeof import.meta !== 'undefined' && import.meta.env
+      ? import.meta.env.VITE_PROFILE_BASE_URL
+      : undefined);
+
+  if (!base) {
+    return null;
+  }
+
+  const normalized = base.replace(/\/$/, '');
+  return {
+    scripts: [`${normalized}/single-spa-entry.js`],
+    styles: [`${normalized}/css/app.css`]
+  };
+};
+
+const toArray = (value) => {
+  if (!value) {
+    return [];
+  }
+  return Array.isArray(value) ? value.filter(Boolean) : [value];
+};
+
+const normalizeEntry = (candidate) => {
+  if (!candidate) {
+    return null;
+  }
+
+  if (typeof candidate === 'string') {
+    return candidate;
+  }
+
+  if (typeof candidate === 'object') {
+    const entryValue = {};
+
+    if (typeof candidate.html === 'string') {
+      entryValue.html = candidate.html;
+    }
+
+    if ('scripts' in candidate || 'styles' in candidate) {
+      const scripts = toArray(candidate.scripts);
+      const styles = toArray(candidate.styles);
+
+      if (scripts.length) {
+        entryValue.scripts = scripts;
+      }
+      if (styles.length) {
+        entryValue.styles = styles;
+      }
+    }
+
+    if (Object.keys(entryValue).length > 0) {
+      return entryValue;
+    }
+
+    return null;
+  }
+
+  return null;
+};
+
+const ensureEntryArrays = (entry) => {
+  if (!entry || typeof entry !== 'object') {
+    return entry;
+  }
+
+  const nextEntry = { ...entry };
+
+  if ('scripts' in nextEntry && !Array.isArray(nextEntry.scripts)) {
+    nextEntry.scripts = toArray(nextEntry.scripts);
+  }
+
+  if ('styles' in nextEntry && !Array.isArray(nextEntry.styles)) {
+    nextEntry.styles = toArray(nextEntry.styles);
+  }
+
+  return nextEntry;
+};
+
+const createModuleHtmlEntry = ({ specifier, styles = [], globalVar, appName }) => {
+  if (!specifier) {
+    return null;
+  }
+
+  const targetGlobal = globalVar || appName || 'microApp';
+  const styleTags = styles
+    .map((href) => {
+      if (typeof href === 'string') {
+        return href;
+      }
+      if (href && typeof href === 'object' && typeof href.href === 'string') {
+        return href.href;
+      }
+      return null;
+    })
+    .filter(Boolean)
+    .map((href) => `<link rel="stylesheet" href="${href}"/>`)
+    .join('');
+
+  const moduleScript = `
+    <script type="module">
+      (async () => {
+        try {
+          const lifecycleModule = await import(${JSON.stringify(specifier)});
+          window[${JSON.stringify(targetGlobal)}] = lifecycleModule;
+        } catch (error) {
+          console.error('[qiankun] failed to load ${targetGlobal}', error);
+          throw error;
+        }
+      })();
+    </script>
+  `;
+
+  return {
+    html: `<!DOCTYPE html><html><head>${styleTags}${moduleScript}</head><body></body></html>`,
+    scripts: [],
+    styles: []
+  };
+};
+
 const microApps = [
   {
     name: 'app-dashboard',
-    loader: async () => {
-      await loadUmdMicroApp(dashboardAssets);
-      const lifecycles =
-        window['app-dashboard-app'] ||
-        window['app-dashboard-main'] ||
-        window['app-dashboard'];
-      if (!lifecycles) {
-        throw new Error('[single-spa] app-dashboard lifecycles not found on window');
-      }
-      return lifecycles;
-    },
-    activeWhen: (location) => location.pathname.startsWith('/dashboard')
+    resolveEntry: () =>
+      normalizeEntry(
+        window.__APP_DASHBOARD_ENTRY__ || window.__APP_DASHBOARD_ASSETS__ || dashboardAssets
+      ),
+    matches: (path = '') => path.startsWith('/dashboard')
   },
   {
     name: 'app-profile',
-    loader: () => {
-      const profileUrl =
-        window.__APP_PROFILE_URL__ ||
-        (typeof import.meta !== 'undefined' && import.meta.env
-          ? import.meta.env.VITE_PROFILE_URL
-          : undefined);
-
-      if (profileUrl) {
-        return import(/* @vite-ignore */ profileUrl);
+    resolveEntry: () => {
+      const directEntry = normalizeEntry(window.__APP_PROFILE_ENTRY__);
+      if (directEntry) {
+        return directEntry;
       }
 
-      return import(/* @vite-ignore */ `${'app-profile'}`);
+      const assetEntry = normalizeEntry(
+        window.__APP_PROFILE_ASSETS__ || getProfileAssetFallback()
+      );
+      if (assetEntry) {
+        return assetEntry;
+      }
+
+      return createModuleHtmlEntry({
+        specifier: getEnvProfileModule(),
+        styles: toArray(window.__APP_PROFILE_STYLES__),
+        appName: 'app-profile'
+      });
     },
-    activeWhen: (location) => location.pathname.startsWith('/profile')
+    matches: (path = '') => path.startsWith('/profile')
   }
 ];
 
 const microContainer = () => document.querySelector('#micro-app-container');
 
-const createCustomProps = () => ({
-  container: microContainer(),
-  domElementGetter: microContainer,
+const createCustomProps = (container) => ({
+  container: container || microContainer(),
+  domElementGetter: () => container || microContainer(),
   sharedUtils: { ...sharedUtils },
   storeBridge,
   onGlobalStateChange: globalActions.onGlobalStateChange,
@@ -187,20 +248,160 @@ const createCustomProps = () => ({
   getGlobalState: globalActions.getGlobalState
 });
 
-microApps.forEach((appConfig) => {
-  registerApplication({
-    name: appConfig.name,
-    app: appConfig.loader,
-    activeWhen: appConfig.activeWhen,
-    customProps: () => ({
-      ...createCustomProps()
-    })
+const resolveMicroAppForRoute = (route) => {
+  if (!route) {
+    return null;
+  }
+
+  const path = route.path || route.fullPath || '';
+  return microApps.find((microApp) => microApp.matches(path)) || null;
+};
+
+const clearMicroContainer = () => {
+  const container = microContainer();
+  if (container) {
+    container.innerHTML = '';
+  }
+};
+
+let activeParcel = null;
+let activeMicroAppName = null;
+let navigationSequence = 0;
+
+const unloadActiveMicroApp = async (sequenceToken) => {
+  if (!activeParcel) {
+    activeMicroAppName = null;
+    clearMicroContainer();
+    return;
+  }
+
+  try {
+    await activeParcel.unmount();
+  } catch (error) {
+    if (process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.error('[qiankun] failed to unmount active micro app', error);
+    }
+  }
+
+  if (typeof activeParcel.unload === 'function') {
+    try {
+      await activeParcel.unload();
+    } catch (error) {
+      if (process.env.NODE_ENV !== 'production') {
+        // eslint-disable-next-line no-console
+        console.warn('[qiankun] failed to unload micro app assets', error);
+      }
+    }
+  }
+
+  if (sequenceToken === navigationSequence) {
+    activeParcel = null;
+    activeMicroAppName = null;
+    clearMicroContainer();
+  }
+};
+
+const mountMicroApp = async (config, sequenceToken, route) => {
+  const container = microContainer();
+  if (!container) {
+    if (process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.warn('[qiankun] micro app container not found');
+    }
+    return;
+  }
+
+  const entry = typeof config.resolveEntry === 'function' ? config.resolveEntry() : config.entry;
+
+  const normalizedEntry = ensureEntryArrays(normalizeEntry(entry));
+  if (!normalizedEntry) {
+    if (process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.warn(`[qiankun] entry not defined for ${config.name}, skip mounting`);
+    }
+    return;
+  }
+
+  if (process.env.NODE_ENV !== 'production') {
+    // eslint-disable-next-line no-console
+    console.debug('[qiankun] loading micro app', config.name, normalizedEntry);
+  }
+
+  const parcel = loadMicroApp(
+    {
+      name: config.name,
+      entry: normalizedEntry,
+      container,
+      props: {
+        ...createCustomProps(container),
+        route
+      }
+    },
+    {
+      sandbox: { strictStyleIsolation: false },
+      prefetch: true,
+      singular: false
+    }
+  );
+
+  activeParcel = parcel;
+  activeMicroAppName = config.name;
+
+  try {
+    await parcel.mountPromise;
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(`[qiankun] failed to mount ${config.name}`, error);
+    if (sequenceToken === navigationSequence) {
+      await unloadActiveMicroApp(sequenceToken);
+    }
+  }
+};
+
+const syncMicroAppWithRoute = async (route) => {
+  const sequenceToken = ++navigationSequence;
+  const targetConfig = resolveMicroAppForRoute(route);
+
+  if (!targetConfig) {
+    await unloadActiveMicroApp(sequenceToken);
+    return;
+  }
+
+  if (activeMicroAppName === targetConfig.name) {
+    return;
+  }
+
+  await unloadActiveMicroApp(sequenceToken);
+
+  if (sequenceToken !== navigationSequence) {
+    return;
+  }
+
+  await mountMicroApp(targetConfig, sequenceToken, route);
+};
+
+router.afterEach((to) => {
+  syncMicroAppWithRoute(to).catch((error) => {
+    if (process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.error('[qiankun] failed to sync micro app after navigation', error);
+    }
   });
 });
 
-addErrorHandler((error) => {
+router.onReady(() => {
+  syncMicroAppWithRoute(router.currentRoute).catch((error) => {
+    if (process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.error('[qiankun] failed to load initial micro app', error);
+    }
+  });
+});
+
+addGlobalUncaughtErrorHandler((event) => {
   // eslint-disable-next-line no-console
-  console.error('[single-spa] micro app error', error);
+  console.error('[qiankun] micro app error', event?.message || event);
 });
 
 Vue.nextTick(() => {

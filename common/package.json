@@ -11,6 +11,7 @@
   "dependencies": {
     "core-js": "^3.8.3",
     "mfe-components": "file:../components",
+    "qiankun": "^2.10.16",
     "vue": "^2.6.14",
     "vue-router": "^3.5.4",
     "vuex": "^3.6.2",
