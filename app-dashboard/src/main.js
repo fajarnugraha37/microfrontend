@@ -1,10 +1,3 @@
-/* eslint-disable no-underscore-dangle */
-if (window.__POWERED_BY_QIANKUN__) {
-  // eslint-disable-next-line no-undef
-  __webpack_public_path__ = window.__INJECTED_PUBLIC_PATH_BY_QIANKUN__;
-}
-/* eslint-enable no-underscore-dangle */
-
 import Vue from 'vue';
 import App from './App.vue';
 import router from './router';
@@ -17,6 +10,7 @@ let offGlobalStateChange = null;
 let isSyncingFromGlobal = false;
 let teardownShellStoreBridge = null;
 let shellStoreFacade = null;
+let mountPoint = null;
 
 const noop = () => {};
 
@@ -203,7 +197,6 @@ const setupGlobalStateSync = (props = {}) => {
 
 function render(props = {}) {
   const {
-    container,
     sharedUtils = {},
     onGlobalStateChange,
     setGlobalState,
@@ -213,6 +206,36 @@ function render(props = {}) {
 
   Vue.prototype.$sharedUtils = sharedUtils;
   const resolvedShellStore = setupShellStoreBridge(props);
+
+  const resolveContainer = () => {
+    if (props.container instanceof Element) {
+      return props.container;
+    }
+    if (typeof props.domElementGetter === 'function') {
+      const element = props.domElementGetter();
+      if (element instanceof Element) {
+        return element;
+      }
+    }
+    return document.querySelector('#micro-app-container');
+  };
+
+  const ensureMountPoint = () => {
+    const containerElement = resolveContainer();
+    if (!containerElement) {
+      return null;
+    }
+
+    let target = containerElement.querySelector('.app-dashboard-root');
+    if (!target) {
+      target = document.createElement('div');
+      target.className = 'app-dashboard-root';
+      containerElement.innerHTML = '';
+      containerElement.appendChild(target);
+    }
+
+    return target;
+  };
 
   Vue.prototype.$microActions = {
     onGlobalStateChange,
@@ -260,6 +283,8 @@ function render(props = {}) {
 
   setupGlobalStateSync(props);
 
+  mountPoint = ensureMountPoint();
+
   instance = new Vue({
     router,
     store,
@@ -273,10 +298,10 @@ function render(props = {}) {
           getGlobalState
         }
       })
-  }).$mount(container ? container.querySelector('#app') : '#app');
+  }).$mount(mountPoint || '#app');
 }
 
-if (!window.__POWERED_BY_QIANKUN__) {
+if (!window.singleSpaNavigate) {
   render();
 }
 
@@ -297,6 +322,11 @@ export async function unmount() {
     instance.$el.innerHTML = '';
     instance = null;
   }
+
+  if (mountPoint && mountPoint.parentNode) {
+    mountPoint.parentNode.removeChild(mountPoint);
+  }
+  mountPoint = null;
 }
 
 export async function update(props) {

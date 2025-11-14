@@ -15,8 +15,11 @@ importers:
         specifier: file:../components
         version: file:../components(vue@2.7.16)
       qiankun:
-        specifier: ^2.10.13
+        specifier: ^2.10.16
         version: 2.10.16
+      single-spa:
+        specifier: ^6.0.3
+        version: 6.0.3
       vue:
         specifier: ^2.6.14
         version: 2.7.16
@@ -1835,6 +1838,9 @@ packages:
 
   single-spa@5.9.5:
     resolution: {integrity: sha512-9SQdmsyz4HSP+3gs6PJzhkaMEg+6zTlu9oxIghnwUX3eq+ajq4ft5egl0iyR55LAmO/UwvU8NgIWs/ZyQMa6dw==}
+
+  single-spa@6.0.3:
+    resolution: {integrity: sha512-pXlwHXHhs3hx/MnGQHBLdFCVAN2rlm9TLBKazbDMyZ25QRxoen2vlUZ47MyXKa9K8Gd5UZs/gkuQad4TGbViwg==}
 
   slash@3.0.0:
     resolution: {integrity: sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==}
@@ -3706,6 +3712,8 @@ snapshots:
   signal-exit@3.0.7: {}
 
   single-spa@5.9.5: {}
+
+  single-spa@6.0.3: {}
 
   slash@3.0.0: {}
 

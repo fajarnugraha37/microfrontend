@@ -21,7 +21,7 @@ const routes = [
   }
 ];
 
-const getBase = () => (window.__POWERED_BY_QIANKUN__ ? '/profile' : '/');
+const getBase = () => (window.singleSpaNavigate ? '/profile' : '/');
 
 export const createRouterInstance = () =>
   createRouter({

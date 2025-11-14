@@ -6,7 +6,7 @@ import DashboardSettings from '../views/DashboardSettings.vue';
 
 Vue.use(Router);
 
-const base = window.__POWERED_BY_QIANKUN__ ? '/dashboard' : '/';
+const base = window.singleSpaNavigate ? '/dashboard' : '/';
 
 const router = new Router({
   mode: 'history',

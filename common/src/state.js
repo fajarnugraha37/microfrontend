@@ -1,5 +1,3 @@
-import { initGlobalState } from 'qiankun';
-
 const initialState = {
   user: null,
   token: null,
@@ -7,28 +5,51 @@ const initialState = {
   shellStore: null
 };
 
-const actions = initGlobalState(initialState);
 let currentState = { ...initialState };
+const listeners = new Set();
 
 const clone = (value) => {
-  if (value === undefined) {
-    return undefined;
+  if (value === undefined || value === null) {
+    return value;
   }
 
-  return JSON.parse(JSON.stringify(value));
+  if (typeof value !== 'object') {
+    return value;
+  }
+
+  try {
+    return JSON.parse(JSON.stringify(value));
+  } catch (error) {
+    if (process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.warn('[global-state] failed to clone value', error);
+    }
+    return value;
+  }
 };
 
-actions.onGlobalStateChange((state) => {
-  currentState = clone(state);
-}, true);
+const notify = (prevState) => {
+  listeners.forEach((callback) => {
+    try {
+      callback(clone(currentState), clone(prevState));
+    } catch (error) {
+      if (process.env.NODE_ENV !== 'production') {
+        // eslint-disable-next-line no-console
+        console.warn('[global-state] listener threw an error', error);
+      }
+    }
+  });
+};
 
 const updateGlobalState = (state) => {
-  const nextState = { ...currentState, ...state };
+  const safeState = state && typeof state === 'object' ? clone(state) : {};
+  const nextState = { ...currentState, ...safeState };
   if (state && typeof state.shellStore === 'object') {
     nextState.shellStore = clone(state.shellStore);
   }
+  const previous = clone(currentState);
   currentState = nextState;
-  actions.setGlobalState(clone(currentState));
+  notify(previous);
 };
 
 const mergedSetGlobalState = (state) => {
@@ -41,9 +62,26 @@ const setShellStore = (shellStore) => {
 };
 
 export default {
-  onGlobalStateChange: actions.onGlobalStateChange,
+  onGlobalStateChange(callback, fireImmediately = false) {
+    if (typeof callback !== 'function') {
+      return () => {};
+    }
+
+    listeners.add(callback);
+    if (fireImmediately) {
+      callback(clone(currentState), clone(currentState));
+    }
+
+    return () => {
+      listeners.delete(callback);
+    };
+  },
   setGlobalState: mergedSetGlobalState,
-  offGlobalStateChange: actions.offGlobalStateChange,
+  offGlobalStateChange(callback) {
+    if (listeners.has(callback)) {
+      listeners.delete(callback);
+    }
+  },
   getGlobalState: () => clone(currentState),
   setShellStore
 };
