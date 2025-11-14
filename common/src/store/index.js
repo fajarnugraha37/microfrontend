@@ -1,4 +1,6 @@
 import createPersistedState from 'vuex-persistedstate';
+import product from './product';
+import auth from './auth';
 
 /**
  * 
@@ -49,6 +51,21 @@ export const useStore = (vue) => {
       })
     ]
   });
+
+  store.registerModule('auth', auth);
+  store.registerModule('product', product);
+
+  store.subscribe((mutation, state) => {
+    // eslint-disable-next-line no-console
+    console.log(`[Vuex] Mutation: ${mutation.type}`, mutation.payload);
+  });
+  store.watch(
+    (state) => state.auth.token,
+    (newToken) => {
+      // eslint-disable-next-line no-console
+      console.log('[Vuex] Auth token changed:', newToken);
+    }
+  );
 
   window.store = store;
 }

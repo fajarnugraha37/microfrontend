@@ -4,12 +4,12 @@
       <h2 class="login-title">Login</h2>
       <div class="login-field">
         <label for="username">Username</label>
-        <input v-model="username" id="username" name="username" type="text" v-validate="'required|alpha_num'" data-vv-as="Username" class="login-input" />
+        <input v-model="userNameInput" id="username" name="username" type="text" v-validate="'required|alpha_num'" data-vv-as="Username" class="login-input" />
         <span v-show="errors.has('username')" class="login-error">{{ errors.first('username') }}</span>
       </div>
       <div class="login-field">
         <label for="password">Password</label>
-        <input v-model="password" id="password" name="password" type="password" v-validate="'required|min:8|validPassword'" data-vv-as="Password" class="login-input" autocomplete="new-password" />
+        <input v-model="passwordInput" id="password" name="password" type="password" v-validate="'required|min:8|validPassword'" data-vv-as="Password" class="login-input" autocomplete="new-password" />
         <span v-show="errors.has('password')" class="login-error">{{ errors.first('password') }}</span>
       </div>
       <button type="submit" class="login-btn">Login</button>
@@ -30,8 +30,8 @@ export default {
   },
   data() {
     return {
-      username: '',
-      password: '',
+      userNameInput: '',
+      passwordInput: '',
       error: null,
     };
   },
@@ -41,7 +41,7 @@ export default {
       if (!valid) return;
       try {
         const service = AuthService();
-        const res = await service.login({ username: this.username, password: this.password });
+        const res = await service.login({ username: this.userNameInput, password: this.passwordInput });
         this.$emit('login-success', res.data);
         this.error = null;
       } catch (e) {
