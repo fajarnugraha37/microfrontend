@@ -1,6 +1,9 @@
 import { productStore } from './product';
 import { authStore } from './auth';
 import { globalStore } from './global';
+import { createVuexModulePiniaStore } from '../../bridge/Raptor-Mini/createVuexModulePiniaStore'
+import { registerAllVuexModulesAsPinia } from '../../bridge/Raptor-Mini/registerAllVuexModulesAsPinia'
+import { getGlobalStore } from '../../bridge/Raptor-Mini/vuexBridgeConfig'
 
 /**
  * 
@@ -11,7 +14,10 @@ export const useVuexStore = (vue) => {
     install(Vue) {
       Vue.use(window.Vuex);
       /** @type {import('vuex').Store} */
-      const store = window.store = new window.Vuex.Store(globalStore);
+      const store = new window.Vuex.Store(globalStore);
+      // expose a consistent globalStore pointer for bridging convenience
+      window.store = store;
+      window.globalStore = store;
 
       store.registerModule('auth', authStore);
       store.registerModule('product', productStore);
@@ -43,4 +49,72 @@ export const usePiniaStore = (vue) => {
 
     }
   });
+}
+
+// -----------------------------------------------------------------------------
+// Convenience helper used by microfrontends migrating to Pinia.
+// - Use createPiniaBridgeStores(pinia) after you have created and installed `pinia`.
+// - It returns a map of namespace => Pinia store factory (useX) functions that you can call
+//   inside your components to obtain reactive Pinia stores that are backed by the global Vuex store.
+// Example (Vue 3 microapp):
+// import { createPinia } from 'pinia'
+// import { createPiniaBridgeStores } from 'common/src/store'
+// const pinia = createPinia()
+// app.use(pinia)
+// const factories = createPiniaBridgeStores(pinia)
+// const useAuth = factories['auth/']
+// const authStore = useAuth() // reactive Pinia store referencing Vuex module data
+// -----------------------------------------------------------------------------
+
+
+/**
+ * Create Pinia bridge store factories for selected Vuex modules or all modules.
+ *
+ * Example usage in a Vue 3 microapp:
+ *
+ * import { createPinia } from 'pinia'
+ * import { createPiniaBridgeStores } from 'common/src/store'
+ * const pinia = createPinia()
+ * const factories = createPiniaBridgeStores(pinia)
+ * // use factory inside components `const useAuth = factories['auth/']; const auth = useAuth()`
+ *
+ * @param {import('pinia').Pinia} pinia
+ * @param {{ modules?: string[] }} [options]
+ * @returns {Object<string, Function>} map of namespace => Pinia factory function (useX store)
+ */
+export function createPiniaBridgeStores(pinia, { modules } = {}) {
+  // Ensure the bridge uses the same global store if available
+  const globalStore = getGlobalStore()
+  if (!globalStore) {
+    // eslint-disable-next-line no-console
+    console.warn('[createPiniaBridgeStores] global Vuex store not found. Make sure configureVuexBridge is called with `getGlobalStore` or window.Vuex is set.')
+  }
+
+  const map = {}
+  if (!modules) {
+    // auto-generate for all Vuex namespaced modules
+    const all = registerAllVuexModulesAsPinia()
+    Object.keys(all).forEach((ns) => {
+      map[ns] = all[ns]
+    })
+    return map
+  }
+
+  // selected modules only
+  modules.forEach((ns) => {
+    // normalize namespace
+    const normalized = ns.endsWith('/') ? ns : `${ns}/`
+    // derive an id
+    const id = `legacy/${normalized.replace(/\/+$/,'').replace(/\//g, '-')}`
+    map[normalized] = createVuexModulePiniaStore({ id, namespace: normalized })
+  })
+  return map
+}
+
+/**
+ * Convenience for common modules in this repo: create pinia bridge factories for auth and product.
+ * @param {import('pinia').Pinia} pinia
+ */
+export function createDefaultPiniaBridgeStores(pinia) {
+  return createPiniaBridgeStores(pinia, { modules: ['auth', 'product'] })
 }
