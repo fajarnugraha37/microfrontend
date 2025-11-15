@@ -23,7 +23,9 @@ export function configureVuexBridge(config) {
  */
 export function getGlobalStore() {
   try {
-    const store = (bridgeConfig && bridgeConfig.getGlobalStore && bridgeConfig.getGlobalStore()) || (typeof window !== 'undefined' ? window.Vuex : null)
+    const store = (bridgeConfig && bridgeConfig.getGlobalStore && bridgeConfig.getGlobalStore()) 
+      || (typeof window !== 'undefined' && (window.globalStore || window.Vuex || window.store)) 
+      || null
 
     if (!store) {
       // Safety: console warning but return null
