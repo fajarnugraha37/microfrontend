@@ -20,6 +20,8 @@
     </nav>
     <section class="profile-app__content">
       <code>
+        {{ useAuth }}
+        <hr />
         {{ useBridgeStore.config }}
       </code>
       <!-- <router-view v-slot="{ Component }">
@@ -54,8 +56,11 @@ export default {
     };
   },
   mounted() {
+    this.useAuth.$patch({
+      user: 'ganti'
+    });
     this.useBridgeStore.$patch({
-      counter: 1000
+      counter: 9999
     });
     console.log('[Pinia->Vuex] mounted.', this.useBridgeStore.counter);
     console.log('[Pinia->Vuex] mounted.', this.$parentStore.getters['isAuthenticated']);

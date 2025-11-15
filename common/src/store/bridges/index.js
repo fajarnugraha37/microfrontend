@@ -1,5 +1,6 @@
 export * from "./create-from-vuex";
 export * from "./vuex-pinia-bridge";
+import { deepPatch } from "../../utils";
 import { createVuexModulePiniaBridge } from "./vuex-pinia-bridge";
 
 /**
@@ -21,4 +22,10 @@ export function registerBridges(vuex, pinia, modules = []) {
     }
 
     return () => disposers.forEach((fn) => fn());
+}
+
+
+export const bridgeReplaceState = function (namespace, state, newRoot) {
+    deepPatch(state, newRoot);
+    console.debug(`[Pinia->Vuex] committed ${namespace}/BRIDGE_REPLACE_STATE`);
 }

@@ -70,23 +70,21 @@ export function createVuexModulePiniaBridge({ vuex, namespace, piniaStore }) {
             syncingFromVuex = false;
         }
     }),
-        {
-            detached: true,
-            deep: true,
-            immediate: true,
-        });
+    {
+        detached: true,
+        deep: true,
+        immediate: true,
+    });
 
     // pinia -> vuex
     const unSubPinia = piniaStore.$subscribe(
         (mutation, state) => mutex.runExclusive(() => {
             try {
-                if (syncingFromVuex) return;
+                if (mutation.payload === undefined || syncingFromVuex) return;
 
                 syncingFromPinia = true;
-                console.debug(`[Pinia->Vuex] syncing ${namespace} state ${mutation.storeId}@${mutation.type}:`, mutation.payload ?? state);
-
-                vuex.commit(`${namespace}/BRIDGE_REPLACE_STATE`, mutation.payload ?? state);
-                console.debug(`[Pinia->Vuex] committed ${namespace}/BRIDGE_REPLACE_STATE`);
+                console.debug(`[Pinia->Vuex] syncing ${namespace} state ${mutation.storeId}@${mutation.type}:`, mutation.payload);
+                vuex.commit(`${namespace}/BRIDGE_REPLACE_STATE`, mutation.payload);
             } finally {
                 syncingFromPinia = false;
             }
@@ -98,7 +96,7 @@ export function createVuexModulePiniaBridge({ vuex, namespace, piniaStore }) {
         }
     );
     return function disposeBridge() {
-        unSubVuex();
+        // unSubVuex();
         unSubPinia();
     };
 }
@@ -151,11 +149,11 @@ export function createVuexRootPiniaBridge({ vuex, piniaStore }) {
     const unSubPinia = piniaStore.$subscribe(
         (mutation, state) => mutex.runExclusive(() => {
             try {
-                if (syncingFromVuex) return;
+                if (mutation.payload === undefined || syncingFromVuex) return;
 
                 syncingFromPinia = true;
-                console.debug(`[Pinia->Vuex] syncing root state ${mutation.storeId}@${mutation.type}:`, mutation.payload ?? state);
-                vuex.commit("BRIDGE_REPLACE_ROOT_STATE", mutation.payload ?? state);
+                console.debug(`[Pinia->Vuex] syncing root state ${mutation.storeId}@${mutation.type}:`, mutation.payload);
+                vuex.commit("BRIDGE_REPLACE_ROOT_STATE", mutation.payload);
             } finally {
                 syncingFromPinia = false;
             }

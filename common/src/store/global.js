@@ -2,7 +2,7 @@ import createPersistedState from 'vuex-persistedstate';
 import _ from "lodash";
 import { authStore } from './auth';
 import { productStore } from './product';
-import { deepPatch } from '../utils';
+import { bridgeReplaceState } from './bridges';
 
 export const globalStore = {
   modules: {
@@ -17,7 +17,7 @@ export const globalStore = {
   },
   mutations: {
     BRIDGE_REPLACE_ROOT_STATE(state, newRoot) {
-      deepPatch(state, newRoot);
+      bridgeReplaceState.call(this, 'global', state, newRoot);
     },
     setUser(state, user) {
       state.user = user;

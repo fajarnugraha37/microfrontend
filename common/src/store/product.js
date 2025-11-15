@@ -1,4 +1,5 @@
 import { ProductService } from '../services/product';
+import { bridgeReplaceState } from './bridges';
 
 const state = {
   products: [],
@@ -6,6 +7,9 @@ const state = {
 };
 
 const mutations = {
+  BRIDGE_REPLACE_STATE(state, newRoot) {
+    bridgeReplaceState.call(this, 'product', state, newRoot);
+  },
   setProducts(state, products) {
     state.products = products;
   },

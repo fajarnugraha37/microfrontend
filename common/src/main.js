@@ -11,28 +11,28 @@ const origMixin = Vue.mixin
 const origDirective = Vue.directive
 const origFilter = Vue.filter
 
-Vue._pluginRegistry = []
-Vue._mixinRegistry = []
-Vue._directiveRegistry = []
-Vue._filterRegistry = []
+window._pluginRegistry = []
+window._mixinRegistry = []
+window._directiveRegistry = []
+window._filterRegistry = []
 
 Vue.use = function (plugin, ...args) {
-  Vue._pluginRegistry.push({ plugin, args })
+  window._pluginRegistry.push({ plugin, args })
   return origUse.call(this, plugin, ...args)
 }
 Vue.mixin = function (mixin) {
-  Vue._mixinRegistry.push(mixin)
+  window._mixinRegistry.push(mixin)
   return origMixin.call(this, mixin)
 }
 Vue.directive = function (name, def) {
   if (def) {
-    Vue._directiveRegistry.push({ name, def })
+    window._directiveRegistry.push({ name, def })
   }
   return origDirective.call(this, name, def)
 }
 Vue.filter = function (name, fn) {
   if (fn) {
-    Vue._filterRegistry.push({ name, fn })
+    window._filterRegistry.push({ name, fn })
   }
   return origFilter.call(this, name, fn)
 }
@@ -84,10 +84,10 @@ console.log('[main] App Store', app.$store);
 console.log('[main] App Validator', app.$validator);
 console.log('[main] App Utils', app.$utils);
 
-console.log('[main] registered plugins: ', Vue._pluginRegistry);
-console.log('[main] registered mixins: ', Vue._mixinRegistry);
-console.log('[main] registered directives: ', Vue._directiveRegistry);
-console.log('[main] registered filters: ', Vue._filterRegistry);
+console.log('[main] registered plugins: ', window._pluginRegistry);
+console.log('[main] registered mixins: ', window._mixinRegistry);
+console.log('[main] registered directives: ', window._directiveRegistry);
+console.log('[main] registered filters: ', window._filterRegistry);
 console.log('[main] registered custom property: ', Object.getOwnPropertyNames(Vue.prototype || {}).filter(
   (k) => k.startsWith('$')));
 
