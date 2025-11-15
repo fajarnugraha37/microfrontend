@@ -1,6 +1,7 @@
 /// <reference path="../global.d.ts" />
 /// <reference path="../node_modules/pinia/dist/pinia.d.ts" />
 
+import "./init";
 import Vue from 'vue';
 import Router from 'vue-router';
 import Vuex from 'vuex';

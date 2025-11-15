@@ -3,35 +3,50 @@
 /* eslint-disable no-underscore-dangle */
 if (window.__POWERED_BY_QIANKUN__) {
   // eslint-disable-next-line no-undef
-  __webpack_public_path__ = window.__INJECTED_PUBLIC_PATH_BY_QIANKUN__;
+  window.__webpack_public_path__ = window.__INJECTED_PUBLIC_PATH_BY_QIANKUN__;
 }
-/* eslint-enable no-underscore-dangle */
 
-import Vue from 'vue';
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
+import * as pinia from 'pinia';
 import App from './App.vue';
 import router from './router';
-import { store } from './store';
 
-Vue.config.productionTip = false;
-
+/**
+ * @type {import('vue').App}
+ */
 let instance = null;
 function render(props = {}) {
-  const {
-    container,
-    store: parentStore,
-  } = props;
+  try {
+    const {
+      container,
+      store: parentStore,
+      globalStore,
+    } = props;
 
-  store.attachModule(parentStore);
-  instance = new window.Vue({
-    router,
-    store: parentStore,
-    render: (h) =>
-      h(App, {
-        store: store,
-        props: {
-        }
-      })
-  }).$mount(container ? container.querySelector('#app') : '#app');
+    // store.attachModule(parentStore);
+    // store.attachModule(globalStore);
+    const piniaInstance = createPinia();
+    const app = createApp(App, {
+      props: {
+        store: parentStore,
+        globalStore: globalStore,
+      },
+      mounted() {
+      }
+    });
+    app.use(piniaInstance);
+    app.use(window.usePiniaStore(pinia), {
+      'config': {},
+    });
+    app.use(router);
+    app.mount(container ? container.querySelector('#app') : '#app');
+    instance = app;
+  } catch (error) {
+    console.error('Error during render:', error);
+  }
+
+  console.info('[app-profile] props from main framework', props);
 }
 
 if (!window.__POWERED_BY_QIANKUN__) {
@@ -48,8 +63,8 @@ export async function mount(props) {
 
 export async function unmount() {
   if (instance) {
-    instance.$destroy();
-    instance.$el.innerHTML = '';
+    instance.unmount();
+    instance._container.innerHTML = '';
     instance = null;
   }
 }

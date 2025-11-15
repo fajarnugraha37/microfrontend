@@ -1,58 +1,68 @@
-window.Vue.use(window.Vuex);
+import { defineStore } from "pinia";
+import { ref, computed } from "vue";
 
-/**
- * @type {import('vuex').Store} parentVuex 
- */
-export const profileStore = new window.Vuex.Store({
-  state: {
-    profile: {
-      bio: 'Front-end engineer passionate about microfrontends.',
-      interests: ['Vue.js', 'Qiankun', 'Design Systems']
-    },
-    sharedShell: {}
-  },
-  mutations: {
-    updateBio(state, bio) {
-      state.profile.bio = bio;
-    },
-    updateInterests(state, interests) {
-      state.profile.interests = interests;
-    },
-    replaceSharedShell(state, payload) {
-      state.sharedShell = { ...payload };
-    }
-  },
-  actions: {
-    saveProfile({ commit }, payload) {
-      commit('updateBio', payload.bio);
-      commit('updateInterests', payload.interests);
-    },
-    setSharedShell({ commit }, payload) {
-      commit('replaceSharedShell', payload);
-    }
-  },
-  getters: {
-    profile: (state, getters, rootState) => () => state.profile,
-    sharedShell: (state, getters, rootState) => () => state.sharedShell,
-    sharedUser: (state, getters, rootState) => () =>
-      state.sharedShell && state.sharedShell.user ? state.sharedShell.user : null
-  }
+export const useProfileStore = defineStore("profile", () => {
+  // State
+  const profile = ref({
+    bio: 'Front-end engineer passionate about microfrontends.',
+    interests: ['Vue.js', 'Qiankun', 'Design Systems']
+  });
+
+  const sharedShell = ref({});
+
+  // Actions
+  const updateBio = (bio) => {
+    profile.value.bio = bio;
+  };
+
+  const updateInterests = (interests) => {
+    profile.value.interests = interests;
+  };
+
+  const saveProfile = (payload) => {
+    updateBio(payload.bio);
+    updateInterests(payload.interests);
+  };
+
+  const replaceSharedShell = (payload) => {
+    sharedShell.value = { ...payload };
+  };
+
+  const setSharedShell = (payload) => {
+    replaceSharedShell(payload);
+  };
+
+  // Getters
+  const sharedUser = computed(() =>
+    sharedShell.value && sharedShell.value.user ? sharedShell.value.user : null
+  );
+
+  return {
+    profile,
+    sharedShell,
+    updateBio,
+    updateInterests,
+    saveProfile,
+    replaceSharedShell,
+    setSharedShell,
+    sharedUser
+  };
 });
 
 export const store = {
   /**
-   * @param {import('vuex').Store} parentVuex 
+   * @param {import('pinia').Pinia} pinia 
    */
-  attachModule: (parentVuex) => {
-    parentVuex.registerModule("profile", profileStore);
-    store.value = parentVuex;
+  attachModule: (pinia) => {
+    store.value = pinia;
   },
   /**
-   * @param {import('vuex').Store} parentVuex 
+   * @param {import('pinia').Pinia} pinia 
    */
-  detachModule: (parentVuex) => {
-    parentVuex.unregisterModule("profile");
+  detachModule: (pinia) => {
     store.value = null;
   },
   value: null
 };
+
+export default store;

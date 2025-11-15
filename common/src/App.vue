@@ -1,7 +1,7 @@
 <template>
   <div id="app" class="layout">
     <header class="layout__header">
-      <h1 class="layout__title">Common Shell</h1>
+      <h1 class="layout__title">Common Shell ({{ counter }})</h1>
       <nav class="layout__nav">
         <router-link to="/">Home</router-link>
         <router-link v-if="!isAuthenticated" to="/login">Login</router-link>
@@ -40,7 +40,7 @@ export default {
   },
   mixins: [],
   computed: {
-    ...mapGetters(['isAuthenticated', 'username'])
+    ...mapGetters(['isAuthenticated', 'username', 'counter'])
   },
   methods: {
     simulateLogin() {

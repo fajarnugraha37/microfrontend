@@ -1,5 +1,11 @@
 module.exports = {
   presets: [
-    '@vue/cli-plugin-babel/preset'
+    [
+      '@babel/preset-env',
+      {
+        modules: false,
+        targets: '> 0.5%, not dead'
+      }
+    ]
   ]
 };

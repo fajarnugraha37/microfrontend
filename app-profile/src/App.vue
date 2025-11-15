@@ -4,6 +4,10 @@
       <h2>Profile Microfrontend</h2>
       <div class="profile-app__user" v-if="isAuthenticated">
         Viewing profile for <strong>{{ username }}</strong>
+        <br />
+        <code>
+          Global Counter: {{ useBridgeStore.counter }}
+        </code>
       </div>
       <div class="profile-app__user" v-else>
         Awaiting authentication from shell...
@@ -15,7 +19,10 @@
       <router-link :to="{ name: 'profile-settings' }">Settings</router-link>
     </nav>
     <section class="profile-app__content">
-      <router-view v-slot="{ Component }">
+      <code>
+        {{ useBridgeStore.config }}
+      </code>
+      <!-- <router-view v-slot="{ Component }">
         <component
           :is="Component"
           :user="user"
@@ -23,26 +30,48 @@
           :shared-shell="sharedShell"
           :push-shared-state="pushSharedState"
         />
-      </router-view>
+      </router-view> -->
     </section>
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
-
+import { useProfileStore } from './store';
 export default {
   name: 'ProfileApp',
+  inject: ['bridgeStore'],
   props: {
     sharedUtils: {
       type: Object,
       default: () => ({})
     }
   },
+  data() {
+    return {
+      useProfileStore: useProfileStore(),
+      useBridgeStore: this.$bridgeStore(),
+      useAuth: this.$derivedStore.auth(),
+    };
+  },
+  mounted() {
+    this.useBridgeStore.$patch({
+      counter: 1000
+    });
+    console.log('[Pinia->Vuex] mounted.', this.useBridgeStore.counter);
+    console.log('[Pinia->Vuex] mounted.', this.$parentStore.getters['isAuthenticated']);
+  },
   computed: {
-    ...mapGetters(['isAuthenticated', 'username']),
+    profile() {
+      return this.useProfileStore.profile;
+    },
     user() {
       return this.sharedUser;
+    },
+    username() {
+      return 'Guest';
+    },
+    isAuthenticated() {
+      return true;
     }
   },
   methods: {

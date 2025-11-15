@@ -1,5 +1,10 @@
+export * from "./configLoader";
+export * from "./formatPrice";
+export * from "./obj";
+
 import loadConfig from "./configLoader";
 import formatPrice from "./formatPrice";
+import obj from "./obj";
 
 export const utils = {
   formatDate: (value) => {
@@ -21,6 +26,7 @@ export const utils = {
   delay: (ms = 0) => new Promise((resolve) => setTimeout(resolve, ms)),
   formatPrice: formatPrice,
   loadConfig: loadConfig,
+  obj: obj,
 };
 
 export const useUtilities = (vue) => {
