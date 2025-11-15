@@ -39,5 +39,8 @@ export function registerAllVuexModulesAsPinia() {
     map[ns] = createVuexModulePiniaStore({ id: sanitizedId, namespace: ns })
   })
 
+  // also expose the root state as '<root>' facade
+  map['<root>'] = createVuexModulePiniaStore({ id: 'legacy/root', namespace: '<root>' })
+
   return map
 }

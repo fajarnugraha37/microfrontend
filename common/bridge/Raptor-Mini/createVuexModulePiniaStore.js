@@ -18,6 +18,10 @@ import { getGlobalStore } from './vuexBridgeConfig'
 function getModuleState(store, namespace) {
   if (!store || !namespace) return null
   // normalize: remove trailing slash if provided
+  // special support for root store
+  if (namespace === '<root>' || namespace === 'root' || namespace === '/' || namespace === '') {
+    return store.state
+  }
   const ns = namespace.endsWith('/') ? namespace.slice(0, -1) : namespace
   const path = ns.split('/') // supports nested modules
   // traverse store.state path
