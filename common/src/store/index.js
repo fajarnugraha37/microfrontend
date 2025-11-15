@@ -44,10 +44,10 @@ export const useVuexStore = window.useVuexStore = (vue) => {
 
 
 /**
- * 
- * @param {import('vue').VueConstructor} vue 
+ * @param {import('pinia').defineStore} defineStore
+ * @returns {function(import('vue').VueConstructor): void}
  */
-export const usePiniaStore = window.usePiniaStore = (defineStore) = (vue) => {
+export const usePiniaStore = window.usePiniaStore = (defineStore) => (vue) => {
   vue.use(new class PiniaStorePlugin {
     install(Vue) {
       Vue.use(createPiniaBridgeStores(defineStore, Vue.reactive, Vue.toRefs, Vue.computed, { 
