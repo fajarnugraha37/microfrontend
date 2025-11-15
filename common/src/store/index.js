@@ -1,61 +1,20 @@
-import createPersistedState from 'vuex-persistedstate';
-import product from './product';
-import auth from './auth';
+import { productStore } from './product';
+import { authStore } from './auth';
+import { globalStore } from './global';
 
 /**
  * 
  * @param {import('vue').VueConstructor} vue 
  */
-export const useStore = (vue) => {
-  vue.use(new class CustomStorePlugin {
+export const useVuexStore = (vue) => {
+  vue.use(new class VuexStorePlugin {
     install(Vue) {
       Vue.use(window.Vuex);
       /** @type {import('vuex').Store} */
-      const store = window.store =new window.Vuex.Store({
-        state: {
-          token: null,
-          user: null,
-          config: null
-        },
-        mutations: {
-          setUser(state, user) {
-            state.user = user;
-          },
-          setToken(state, token) {
-            state.token = token;
-          },
-          resetAuth(state) {
-            state.user = null;
-            state.token = null;
-          },
-          setConfig(state, config) {
-            state.config = config;
-          }
-        },
-        actions: {
-          login({ commit }, payload) {
-            commit('setUser', payload.user);
-            commit('setToken', payload.token);
-          },
-          logout({ commit }) {
-            commit('resetAuth');
-          }
-        },
-        getters: {
-          isAuthenticated: (state) => Boolean(state.token),
-          username: (state) => (state.user ? state.user.name : ''),
-          config: (state) => state.config
-        },
-        plugins: [
-          createPersistedState({
-            key: 'common-shell',
-            paths: ['token', 'user', 'config']
-          })
-        ]
-      });
+      const store = window.store = new window.Vuex.Store(globalStore);
 
-      store.registerModule('auth', auth);
-      store.registerModule('product', product);
+      store.registerModule('auth', authStore);
+      store.registerModule('product', productStore);
 
       store.subscribe((mutation, state) => {
         // eslint-disable-next-line no-console
@@ -69,6 +28,19 @@ export const useStore = (vue) => {
           console.log('[Vuex] Auth token changed:', newToken);
         }
       );
+    }
+  });
+}
+
+
+/**
+ * 
+ * @param {import('vue').VueConstructor} vue 
+ */
+export const usePiniaStore = (vue) => {
+  vue.use(new class PiniaStorePlugin {
+    install(Vue) {
+
     }
   });
 }

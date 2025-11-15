@@ -27,7 +27,7 @@ const actions = {
   },
 };
 
-export default {
+export const productStore = {
   namespaced: true,
   state,
   mutations,

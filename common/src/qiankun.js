@@ -1,7 +1,5 @@
 import Vue from 'vue';
 import { registerMicroApps, addGlobalUncaughtErrorHandler, addErrorHandler, start } from 'qiankun';
-import globalActions from './state';
-import { utils as sharedUtils } from './utils';
 
 
 export const useQiankun = () => {
@@ -21,11 +19,6 @@ export const useQiankun = () => {
       activeRule: '/dashboard',
       props: {
         store: window.store,
-        sharedUtils: { ...sharedUtils },
-        onGlobalStateChange: globalActions.onGlobalStateChange,
-        setGlobalState: globalActions.setGlobalState,
-        offGlobalStateChange: globalActions.offGlobalStateChange,
-        getGlobalState: globalActions.getGlobalState
       }
     },
     {
@@ -35,11 +28,6 @@ export const useQiankun = () => {
       activeRule: '/profile',
       props: {
         store: window.store,
-        sharedUtils: { ...sharedUtils },
-        onGlobalStateChange: globalActions.onGlobalStateChange,
-        setGlobalState: globalActions.setGlobalState,
-        offGlobalStateChange: globalActions.offGlobalStateChange,
-        getGlobalState: globalActions.getGlobalState
       }
     }
   ];

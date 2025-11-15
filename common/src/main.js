@@ -37,7 +37,7 @@ Vue.filter = function (name, fn) {
 }
 
 import { useRouter } from './router';
-import { useStore } from './store';
+import { useVuexStore } from './store';
 import { useUtilities } from './utils';
 import { useValidators } from './validators';
 import { useMixins } from './mixins';
@@ -60,7 +60,7 @@ window.Vue.config.warnHandler = function (msg, vm, trace) {
 useUtilities(window.Vue);
 useMixins(window.Vue);
 useValidators(window.Vue);
-useStore(window.Vue);
+useVuexStore(window.Vue);
 useRouter(window.Vue);
 
 const app = (() => {

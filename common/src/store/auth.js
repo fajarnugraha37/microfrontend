@@ -32,9 +32,9 @@ const actions = {
   },
 };
 
-export default {
+export const authStore = {
   namespaced: true,
-  state,
-  mutations,
-  actions,
+  state: state,
+  mutations: mutations,
+  actions: actions,
 };
