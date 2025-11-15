@@ -31,6 +31,8 @@ export default {
   },
   data() {
     return {
+      useBridgeStore: this.$bridgeStore(),
+      useAuth: this.$derivedStore.auth(),
       timeline: [
         {
           id: 1,

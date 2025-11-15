@@ -10,7 +10,15 @@ const MICRO_APP_NAME = "app-profile";
 export default defineConfig({
   base: "/",
   plugins: [
-    vue(),
+    vue({
+      template: {
+        compilerOptions: {
+          compatConfig: {
+            MODE: 2
+          }
+        }
+      }
+    }),
     qiankun({
       name: MICRO_APP_NAME,
       sandbox: false
@@ -23,6 +31,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
+      vue: '@vue/compat'
     },
   },
   define: {

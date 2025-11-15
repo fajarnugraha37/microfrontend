@@ -19,8 +19,8 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
 import { CButton } from 'mfe-components';
+import { useProfileStore } from '../store';
 
 export default {
   name: 'ProfileSettings',
@@ -43,6 +43,9 @@ export default {
   },
   data() {
     return {
+      useProfileStore: useProfileStore(),
+      useBridgeStore: this.$bridgeStore(),
+      useAuth: this.$derivedStore.auth(),
       form: {
         bio: '',
         interests: ''
@@ -51,14 +54,23 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['profile'])
+    profile() {
+      return this.useProfileStore.profile;
+    }
   },
   created() {
     this.form.bio = this.profile.bio;
     this.form.interests = this.profile.interests.join(', ');
   },
   methods: {
-    ...mapActions(['saveProfile']),
+    saveProfile(partial) {
+      this.useProfileStore.$patch({
+        profile: {
+          ...this.useProfileStore.profile,
+          ...partial
+        }
+      });
+    },
     save() {
       const interests = this.form.interests
         .split(',')

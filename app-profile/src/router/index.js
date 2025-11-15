@@ -6,8 +6,7 @@ import ProfileSettings from '../views/ProfileSettings.vue';
 const base = window.__POWERED_BY_QIANKUN__ ? '/profile' : '/';
 
 const router = new createRouter({
-  history: createWebHistory(),
-  base,
+  history: createWebHistory(base),
   routes: [
     {
       path: '/',

@@ -18,15 +18,20 @@
           {{ interest }}
         </li>
       </ul>
+    <c-button>Notify Shell About Activity</c-button>
     </section>
   </article>
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { useProfileStore } from '../store';
+import { CButton } from 'mfe-components';
 
 export default {
   name: 'ProfileOverview',
+  components: {
+    CButton
+  },
   props: {
     sharedShell: {
       type: Object,
@@ -37,9 +42,27 @@ export default {
       default: () => ({})
     }
   },
+  data() {
+    return {
+      useProfileStore: useProfileStore(),
+      useBridgeStore: this.$bridgeStore(),
+      useAuth: this.$derivedStore.auth(),
+    };
+  },
   computed: {
-    ...mapGetters(['isAuthenticated', 'username']),
-    ...mapGetters(['profile']),
+    profile() {
+      return this.useProfileStore.profile;
+    },
+    username() {
+      return this.sharedShell && this.sharedShell.user
+        ? this.sharedShell.user.name
+        : 'Guest';
+    },
+    isAuthenticated() {
+      return this.sharedShell && this.sharedShell.isAuthenticated
+        ? this.sharedShell.isAuthenticated
+        : false;
+    },
     user() {
       return this.sharedShell && this.sharedShell.user ? this.sharedShell.user : null;
     }

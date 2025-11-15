@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@vue/compat':
+        specifier: ^3.5.24
+        version: 3.5.24(vue@3.5.24(typescript@5.9.3))
       core-js:
         specifier: ^3.8.3
         version: 3.46.0
@@ -18,7 +21,7 @@ importers:
         specifier: ^3.0.4
         version: 3.0.4(typescript@5.9.3)(vue@3.5.24(typescript@5.9.3))
       vue:
-        specifier: ^3.4.21
+        specifier: ^3.5.24
         version: 3.5.24(typescript@5.9.3)
       vue-router:
         specifier: ^4.3.0
@@ -42,6 +45,9 @@ importers:
       '@vitejs/plugin-vue':
         specifier: ^4.5.0
         version: 4.6.2(vite@4.5.14(@types/node@18.19.130)(terser@5.4.0))(vue@3.5.24(typescript@5.9.3))
+      '@vue/compiler-sfc':
+        specifier: ^3.5.24
+        version: 3.5.24
       babel-eslint:
         specifier: ^10.1.0
         version: 10.1.0(eslint@6.8.0)
@@ -718,6 +724,11 @@ packages:
     peerDependencies:
       vite: ^4.0.0 || ^5.0.0
       vue: ^3.2.25
+
+  '@vue/compat@3.5.24':
+    resolution: {integrity: sha512-JOZBonfGFSOeeoxjKNllSyP6LAmqWxZMlacRgWusSuRDMhjAJYTZ/56Yluw0j/FjOhKB5zEvU7JCoZzmYkYaIQ==}
+    peerDependencies:
+      vue: 3.5.24
 
   '@vue/compiler-core@3.5.24':
     resolution: {integrity: sha512-eDl5H57AOpNakGNAkFDH+y7kTqrQpJkZFXhWZQGyx/5Wh7B1uQYvcWkvZi11BDhscPgj8N7XV3oRwiPnx1Vrig==}
@@ -2381,6 +2392,13 @@ snapshots:
   '@vitejs/plugin-vue@4.6.2(vite@4.5.14(@types/node@18.19.130)(terser@5.4.0))(vue@3.5.24(typescript@5.9.3))':
     dependencies:
       vite: 4.5.14(@types/node@18.19.130)(terser@5.4.0)
+      vue: 3.5.24(typescript@5.9.3)
+
+  '@vue/compat@3.5.24(vue@3.5.24(typescript@5.9.3))':
+    dependencies:
+      '@babel/parser': 7.28.5
+      estree-walker: 2.0.2
+      source-map-js: 1.2.1
       vue: 3.5.24(typescript@5.9.3)
 
   '@vue/compiler-core@3.5.24':
