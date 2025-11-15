@@ -19,6 +19,7 @@ export const useQiankun = () => {
       activeRule: '/dashboard',
       props: {
         store: window.store,
+        globalStore: window.globalStore,
       }
     },
     {
@@ -28,6 +29,7 @@ export const useQiankun = () => {
       activeRule: '/profile',
       props: {
         store: window.store,
+        globalStore: window.globalStore,
       }
     }
   ];

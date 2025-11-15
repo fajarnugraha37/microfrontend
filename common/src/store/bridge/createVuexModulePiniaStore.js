@@ -1,5 +1,3 @@
-import { defineStore } from 'pinia'
-import { reactive, toRefs, computed } from 'vue'
 import { getGlobalStore } from './vuexBridgeConfig'
 
 /**
@@ -71,9 +69,13 @@ const _namespaceSubscriptions = {}
  * offers generic methods to dispatch/commit to Vuex.
  *
  * @param {CreateVuexModulePiniaStoreOptions} options
+ * @param {import('pinia').defineStore} defineStore
+ * @param {import('vue').reactive} reactive
+ * @param {import('vue').toRefs} toRefs
+ * @param {import('vue').computed} computed
  * @returns {function(): import('pinia').StoreDefinition}
  */
-export function createVuexModulePiniaStore(options) {
+export function createVuexModulePiniaStore(options, defineStore, reactive, toRefs, computed) {
   const {
     id,
     namespace,
@@ -85,7 +87,6 @@ export function createVuexModulePiniaStore(options) {
     throw new Error('[createVuexModulePiniaStore] id and namespace are required')
   }
 
-  // define store using Pinia's setup store API
   return defineStore(id, () => {
     const globalStore = getGlobalStore()
 

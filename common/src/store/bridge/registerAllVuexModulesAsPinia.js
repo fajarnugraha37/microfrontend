@@ -5,9 +5,13 @@ import { getGlobalStore } from './vuexBridgeConfig'
  * Inspects the global Vuex store and creates Pinia stores for each namespaced Vuex module.
  * Note: this relies on Vuex internals such as _modulesNamespaceMap.
  *
+ * @param {import('pinia').defineStore} defineStore
+ * @param {import('vue').reactive} reactive
+ * @param {import('vue').toRefs} toRefs
+ * @param {import('vue').computed} computed
  * @returns {Object<string, function(): import('pinia').StoreDefinition>} map of [namespace]: storeFactory
  */
-export function registerAllVuexModulesAsPinia() {
+export function registerAllVuexModulesAsPinia(defineStore, reactive, toRefs, computed) {
   const globalStore = getGlobalStore()
   if (!globalStore) {
     // eslint-disable-next-line no-console
@@ -27,7 +31,7 @@ export function registerAllVuexModulesAsPinia() {
     const stateKeys = Object.keys(globalStore.state || {})
     stateKeys.forEach((k) => {
       const ns = `${k}/`
-      map[ns] = createVuexModulePiniaStore({ id: `legacy/${k}`, namespace: ns })
+      map[ns] = createVuexModulePiniaStore({ id: `legacy/${k}`, namespace: ns }, defineStore, reactive, toRefs, computed)
     })
     return map
   }
@@ -36,11 +40,11 @@ export function registerAllVuexModulesAsPinia() {
     // ns should be something like 'auth/' or 'profile/submodule/'
     // create a Pinia store factory with id derived from namespace
     const sanitizedId = `legacy/${ns.replace(/\/+$/,'').replace(/\//g, '-')}`
-    map[ns] = createVuexModulePiniaStore({ id: sanitizedId, namespace: ns })
+    map[ns] = createVuexModulePiniaStore({ id: sanitizedId, namespace: ns }, defineStore, reactive, toRefs, computed)
   })
 
   // also expose the root state as '<root>' facade
-  map['<root>'] = createVuexModulePiniaStore({ id: 'legacy/root', namespace: '<root>' })
+  map['<root>'] = createVuexModulePiniaStore({ id: 'legacy/root', namespace: '<root>' }, defineStore, reactive, toRefs, computed)
 
   return map
 }
