@@ -1,3 +1,5 @@
+/// <reference path="../global.d.ts" />
+
 /* eslint-disable no-underscore-dangle */
 if (window.__POWERED_BY_QIANKUN__) {
   // eslint-disable-next-line no-undef

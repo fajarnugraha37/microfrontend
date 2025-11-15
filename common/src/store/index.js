@@ -59,7 +59,8 @@ export const useStore = (vue) => {
 
       store.subscribe((mutation, state) => {
         // eslint-disable-next-line no-console
-        console.log(`[Vuex] Mutation: ${mutation.type}`, mutation.payload);
+        console.log(`[Vuex] Mutation: ${mutation.type}`, JSON.stringify(state));
+        console.log(`[Vuex] Mutation: ${Object.keys(mutation.payload).join(', ')}`);
       });
       store.watch(
         (state) => state.auth.token,
@@ -71,4 +72,3 @@ export const useStore = (vue) => {
     }
   });
 }
-

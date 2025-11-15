@@ -1,3 +1,6 @@
+/// <reference path="../global.d.ts" />
+/// <reference path="../node_modules/pinia/dist/pinia.d.ts" />
+
 import Vue from 'vue';
 import Router from 'vue-router';
 import Vuex from 'vuex';
@@ -43,9 +46,16 @@ import App from './App.vue';
 import { useQiankun } from './qiankun';
 
 window.Vue = Vue;
-window.Vue.config.productionTip = false;
 window.VueRouter = Router;
 window.Vuex = Vuex;
+window.Vue.config.productionTip = false;
+window.Vue.config.devtools = true;
+window.Vue.config.errorHandler = function (err, vm, info) {
+  console.error('[Vue Error]', err, info, vm);
+}
+window.Vue.config.warnHandler = function (msg, vm, trace) {
+  console.warn('[Vue Warn]', msg, trace, vm);
+}
 
 useUtilities(window.Vue);
 useMixins(window.Vue);

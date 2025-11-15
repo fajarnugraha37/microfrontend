@@ -10,39 +10,6 @@ export const useQiankun = () => {
     return;
   }
 
-  let isSyncingFromGlobal = false;
-  let serializedShellStore = JSON.stringify(window.store.state);
-
-  globalActions.setShellStore(window.store.state);
-
-  globalActions.onGlobalStateChange((state) => {
-    if (state && state.shellStore) {
-      const incoming = JSON.stringify(state.shellStore);
-      if (incoming !== serializedShellStore) {
-        isSyncingFromGlobal = true;
-        store.replaceState({
-          ...store.state,
-          ...state.shellStore
-        });
-        serializedShellStore = incoming;
-        isSyncingFromGlobal = false;
-      }
-    }
-  });
-
-  store.subscribe((mutation, state) => {
-    if (isSyncingFromGlobal) {
-      return;
-    }
-
-    const nextSerialized = JSON.stringify(state);
-    if (nextSerialized !== serializedShellStore) {
-      serializedShellStore = nextSerialized;
-      globalActions.setShellStore(state);
-    }
-  });
-  console.log('[qiankun] store synchronization setup complete.', window.store);
-
   /**
    * @type {import('qiankun').RegistrableApp<any>[]}
    */

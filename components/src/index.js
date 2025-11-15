@@ -1,3 +1,5 @@
+/// <reference path="../global.d.ts" />
+
 import CButton from './components/CButton.vue';
 import CInput from './components/CInput.vue';
 

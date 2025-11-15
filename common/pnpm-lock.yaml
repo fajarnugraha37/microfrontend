@@ -17,9 +17,6 @@ importers:
       mfe-components:
         specifier: file:../components
         version: file:../components(vue@2.7.16)
-      pinia:
-        specifier: ^3.0.4
-        version: 3.0.4(vue@2.7.16)
       qiankun:
         specifier: ^2.10.13
         version: 2.10.16
@@ -60,6 +57,9 @@ importers:
       html-webpack-plugin:
         specifier: ^5.6.4
         version: 5.6.4(webpack@4.47.0)
+      pinia:
+        specifier: ^3.0.4
+        version: 3.0.4(vue@2.7.16)
 
 packages:
 
