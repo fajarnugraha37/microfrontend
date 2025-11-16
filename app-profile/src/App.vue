@@ -57,7 +57,7 @@ export default {
     this.useBridgeStore.$patch({
       counter: 9999
     });
-    console.log('[Pinia->Vuex] mounted.', this.useBridgeStore.counter);
+    console.log('[Pinia->Vuex] mounted.', this.useBridgeStore);
     console.log('[Pinia->Vuex] mounted.', this.$store.getters['isAuthenticated']);
   },
   computed: {
