@@ -2,7 +2,7 @@ import createPersistedState from 'vuex-persistedstate';
 import _ from "lodash";
 import { authStore } from './auth';
 import { productStore } from './product';
-import { bridgeReplaceState } from './bridges';
+import { bridgeReplaceState } from 'mfe-components';
 
 export const globalStore = {
   modules: {

@@ -816,6 +816,9 @@ packages:
     resolution: {integrity: sha512-+Ryf6g3BKoRc7jfp7ad8tM4TtMiaWvbF/1/sQcZPkkS7ag3D5nMBCe2UfOTONtAkaG0tO0ij3C5Lwmf1EiyjHg==}
     engines: {node: '>=4'}
 
+  async-mutex@0.5.0:
+    resolution: {integrity: sha512-1A94B18jkJ3DYq284ohPxoXbfTA5HsQ7/Mf4DEhcyLx3Bz27Rh59iScbB6EPiP+B+joue6YCxcMXSbFC1tZKwA==}
+
   babel-eslint@10.1.0:
     resolution: {integrity: sha512-ifWaTHQ0ce+448CYop8AdrQiBsGrnC+bMgfyKFdi6EsPLTAWG+QfyDeM6OH+FmWnKvEq5NnBMLvlBUPKQZoDSg==}
     engines: {node: '>=6'}
@@ -1508,6 +1511,9 @@ packages:
 
   tslib@1.14.1:
     resolution: {integrity: sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==}
+
+  tslib@2.8.1:
+    resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
   type-check@0.3.2:
     resolution: {integrity: sha512-ZCmOJdvOWDBYJlzAoFkC+Q0+bUyEOS1ltgp1MGU03fqHG+dbi9tBFU2Rd9QKiDZFAYrhPh2JUf7rZRIuHRKtOg==}
@@ -2512,6 +2518,10 @@ snapshots:
 
   astral-regex@1.0.0: {}
 
+  async-mutex@0.5.0:
+    dependencies:
+      tslib: 2.8.1
+
   babel-eslint@10.1.0(eslint@6.8.0):
     dependencies:
       '@babel/code-frame': 7.27.1
@@ -2977,7 +2987,9 @@ snapshots:
 
   mfe-components@file:../components(vue@3.5.24(typescript@5.9.3)):
     dependencies:
+      async-mutex: 0.5.0
       core-js: 3.46.0
+      lodash: 4.17.21
       vue: 3.5.24(typescript@5.9.3)
 
   mimic-fn@2.1.0: {}
@@ -3221,6 +3233,8 @@ snapshots:
       os-tmpdir: 1.0.2
 
   tslib@1.14.1: {}
+
+  tslib@2.8.1: {}
 
   type-check@0.3.2:
     dependencies:

@@ -1,4 +1,4 @@
-/// <reference path="../global.d.ts" />
+/// <reference path="../node_modules/mfe-components/global.d.ts" />
 
 /* eslint-disable no-underscore-dangle */
 if (window.__POWERED_BY_QIANKUN__) {

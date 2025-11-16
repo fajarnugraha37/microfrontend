@@ -1,5 +1,5 @@
 import { ProductService } from '../services/product';
-import { bridgeReplaceState } from './bridges';
+import { bridgeReplaceState } from 'mfe-components';
 
 const state = {
   products: [],

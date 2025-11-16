@@ -1,7 +1,6 @@
-/// <reference path="../global.d.ts" />
 /// <reference path="../node_modules/pinia/dist/pinia.d.ts" />
+/// <reference path="../node_modules/mfe-components/global.d.ts" />
 
-import "./init";
 import Vue from 'vue';
 import Router from 'vue-router';
 import Vuex from 'vuex';
@@ -38,13 +37,14 @@ Vue.filter = function (name, fn) {
 }
 
 import { useRouter } from './router';
-import { useVuexStore } from './store';
 import { useUtilities } from './utils';
 import { useValidators } from './validators';
 import { useMixins } from './mixins';
 
 import App from './App.vue';
 import { useQiankun } from './qiankun';
+import { useVuexStore } from 'mfe-components';
+import { globalStore } from './store';
 
 window.Vue = Vue;
 window.VueRouter = Router;
@@ -61,7 +61,9 @@ window.Vue.config.warnHandler = function (msg, vm, trace) {
 useUtilities(window.Vue);
 useMixins(window.Vue);
 useValidators(window.Vue);
-useVuexStore(window.Vue);
+useVuexStore(window.Vue, globalStore, (store) => {
+  store.dispatch('schedularIncrement');
+});
 useRouter(window.Vue);
 
 const app = (() => {

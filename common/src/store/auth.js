@@ -1,5 +1,5 @@
 import { AuthService } from '../services/auth';
-import { bridgeReplaceState } from './bridges';
+import { bridgeReplaceState } from 'mfe-components';
 
 const state = {
   token: '', // Only set from Vuex mutations/actions

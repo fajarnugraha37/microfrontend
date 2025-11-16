@@ -9364,7 +9364,9 @@ snapshots:
 
   mfe-components@file:../components(vue@2.7.16):
     dependencies:
+      async-mutex: 0.5.0
       core-js: 3.46.0
+      lodash: 4.17.21
       vue: 2.7.16
 
   micromatch@3.1.10(supports-color@6.1.0):
