@@ -3,7 +3,7 @@ import globalStateMixin from "./globalStateMixin";
 import productMixin from "./productMixin";
 import userMixin from "./userMixin";
 
-const mixins = window.$legacyMixins = {
+const mixins = window.legacyMixins = {
     configMixin,
     configMixin,
     globalStateMixin,
