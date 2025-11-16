@@ -1,88 +1,92 @@
-const path = require("path");
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const pkg = require('./package.json');
+const path = require('path');
 
-/** @type {import("@vue/cli-service").ProjectOptions} */
-module.exports = ({
-  assetsDir: "assets",
+module.exports = {
+  outputDir: 'dist',
+  assetsDir: 'assets',
   filenameHashing: false,
-  // pages: {
-  //   app: {
-  //     // entry for the page
-  //     entry: 'src/main.js',
-  //     // the source template
-  //     template: 'public/index.html',
-  //     // output as dist/index.html
-  //     filename: 'index.html',
-  //     // when using title option,
-  //     // template title tag needs to be <title><%= htmlWebpackPlugin.options.title %></title>
-  //     title: 'Microfrontend Shell App',
-  //     // chunks to include on this page, by default includes
-  //     // extracted common chunks and vendor chunks.
-  //     chunks: ['chunk-vendors', 'chunk-common', 'app']
-  //   },
-  //   state: {
-  //     // entry for the page
-  //     entry: 'src/state.js',
-  //     // the source template
-  //     template: 'public/index.html',
-  //     // output as dist/index.html
-  //     filename: 'state.html',
-  //     // when using title option,
-  //     // template title tag needs to be <title><%= htmlWebpackPlugin.options.title %></title>
-  //     title: 'Microfrontend Shell App - State',
-  //     // chunks to include on this page, by default includes
-  //     // extracted common chunks and vendor chunks.
-  //     chunks: ['chunk-vendors', 'chunk-common', 'state']
-  //   },
-  //   // template is inferred to be `public/subpage.html`
-  //   // and falls back to `public/index.html` if not found.
-  //   // Output filename is inferred to be `subpage.html`.
-  //   // subpage: 'src/subpage/main.js'
-  // },
+
+  css: {
+    extract: {
+      filename: 'css/[name].css',
+      chunkFilename: 'css/[name].css'
+    }
+  },
+
   devServer: {
     port: 8080,
     headers: {
       'Access-Control-Allow-Origin': '*'
     }
   },
-  configureWebpack: {
-    // entry: {
-    //   main: "./src/main.js",
-    //   state: "./src/state.js",
-    //   'mfe-components': ['mfe-components'],
-    //   qiankun: ['qiankun'],
-    //   vue: ['vue'],
-    //   vuex: ['vuex'],
-    //   'vuex-persistedstate': ['vuex-persistedstate'],
-    // },
-    optimization: {
-      chunkIds: "named",
-      splitChunks: {
-        cacheGroups: {
-          commons: {
-            chunks: "initial",
-            minChunks: 2,
-            maxInitialRequests: 5, // The default limit is too small to showcase the effect
-            minSize: 0 // This is example is too small to create commons chunks
+
+  configureWebpack: (config) => {
+    config.plugins = config.plugins || [];
+    config.plugins.push(new CleanWebpackPlugin());
+
+    config.output = config.output || {};
+    config.output.filename = (chunkData) => {
+      return chunkData.chunk && chunkData.chunk.name === 'app' ? 'js/app.js' : 'js/[name].js';
+    };
+    config.output.chunkFilename = 'js/[name].js';
+
+    config.optimization = config.optimization || {};
+    config.optimization.chunkIds = 'named';
+    config.optimization.splitChunks = {
+      chunks: 'all',
+      maxInitialRequests: Infinity,
+      minSize: 0,
+      cacheGroups: {
+        vendorPackages: {
+          test: /[\\/]node_modules[\\/]/,
+          name(module) {
+            const packageName = (module.context || '')
+              .split("node_modules")
+              .pop()
+              ?.split("\\")[1];
+            if (packageName === pkg.name) 
+              return pkg.name;
+            return `vendor/${packageName}`;
           },
-          vendor: {
-            test: /[\\/]node_modules[\\/]/, // Target modules in node_modules
-            name: 'vendors', // Name of the vendor chunk
-            chunks: 'all',
-            // test: /node_modules/,
-            // chunks: "initial",
-            // name: "vendor",
-            // priority: 10,
-            // enforce: true
-          }
+          chunks: 'all',
         }
       }
-    },
-    output: {
-      path: path.join(__dirname, "dist"),
-      filename: (chunkdata) => {
-        return "js/[name].js";
-      }
-    },
+    };
   },
-  lintOnSave: false
-});
+
+  chainWebpack: (config) => {
+    config.optimization.splitChunks({
+      cacheGroups: {
+        styles: {
+          name: 'styles',
+          test: /\.css$/,
+          chunks: 'all',
+          enforce: true
+        }
+      }
+    });
+
+    const imageRule = config.module.rule('images');
+    imageRule.use('url-loader').tap((options) => {
+      if (options && options.fallback && options.fallback.options) {
+        options.fallback.options.name = 'img/[name].[ext]';
+      } else if (options) {
+        options.name = 'img/[name].[ext]';
+      }
+      return options;
+    });
+
+    const fontsRule = config.module.rule('fonts');
+    fontsRule.use('url-loader').tap((options) => {
+      if (options && options.fallback && options.fallback.options) {
+        options.fallback.options.name = 'fonts/[name].[ext]';
+      } else if (options) {
+        options.name = 'fonts/[name].[ext]';
+      }
+      return options;
+    });
+  },
+
+  lintOnSave: false,
+};

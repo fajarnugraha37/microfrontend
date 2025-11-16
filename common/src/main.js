@@ -1,6 +1,8 @@
 /// <reference path="../node_modules/pinia/dist/pinia.d.ts" />
 /// <reference path="../node_modules/mfe-components/global.d.ts" />
 
+import "bootstrap/dist/css/bootstrap.css";
+import "bootstrap/dist/js/bootstrap.js";
 import Vue from 'vue';
 import Router from 'vue-router';
 import Vuex from 'vuex';

@@ -11,9 +11,6 @@ importers:
       core-js:
         specifier: ^3.8.3
         version: 3.46.0
-      mfe-components:
-        specifier: file:../components
-        version: file:../components(vue@2.7.16)
     devDependencies:
       '@vue/cli-plugin-babel':
         specifier: ~4.5.0
@@ -27,12 +24,21 @@ importers:
       babel-eslint:
         specifier: ^10.1.0
         version: 10.1.0(eslint@7.32.0)
+      clean-webpack-plugin:
+        specifier: ^4.0.0
+        version: 4.0.0(webpack@4.47.0)
       eslint:
         specifier: ^7.32.0
         version: 7.32.0
       eslint-plugin-vue:
         specifier: ^6.2.2
         version: 6.2.2(eslint@7.32.0)
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      mfe-components:
+        specifier: file:..\components
+        version: file:../components(vue@2.7.16)
       vue:
         specifier: ^2.7.16
         version: 2.7.16
@@ -1444,6 +1450,12 @@ packages:
   clean-css@4.2.4:
     resolution: {integrity: sha512-EJUDT7nDVFDvaQgAo2G/PJvxmp1o/c6iXLbswsBbUFXi1Nr+AjA2cKmfbKDMjMvzEe75g3P6JkaDDAKk96A85A==}
     engines: {node: '>= 4.0'}
+
+  clean-webpack-plugin@4.0.0:
+    resolution: {integrity: sha512-WuWE1nyTNAyW5T7oNyys2EN0cfP2fdRxhxnIQWiAp0bMabPdHhoGxM8A6YL2GhqwgrPnnaemVE7nv5XJ2Fhh2w==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      webpack: '>=4.0.0 <6.0.0'
 
   cli-cursor@2.1.0:
     resolution: {integrity: sha512-8lgKz8LmCRYZZQDpRyT2m5rKJ08TnU4tR9FFFW2rxpxR1FzWi4PQ/NfyODchAatHaUgnSPVcx/R5w6NuTBzFiw==}
@@ -7116,6 +7128,11 @@ snapshots:
   clean-css@4.2.4:
     dependencies:
       source-map: 0.6.1
+
+  clean-webpack-plugin@4.0.0(webpack@4.47.0):
+    dependencies:
+      del: 4.1.1
+      webpack: 4.47.0
 
   cli-cursor@2.1.0:
     dependencies:
