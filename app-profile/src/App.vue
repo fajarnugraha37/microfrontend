@@ -5,15 +5,19 @@
       <div class="profile-app__user" v-if="isAuthenticated">
         Viewing profile for <strong>{{ username }} from username</strong>
         <br />
-        <code>
+        <h3>
           Global Counter: {{ useBridgeStore.counter }}
-        </code>
+        </h3>
       </div>
       <div class="profile-app__user" v-else>
         Awaiting authentication from shell...
       </div>
-      <button @click="increment">Increment Count</button>
-      <button @click="decrement">Decrement Count</button>
+      <hr />
+      <button class="c-button c-button--primary" @click="increment">Increment Count (Vuex)</button>
+      <button class="c-button c-button--primary" @click="decrement">Decrement Count (Vuex)</button>
+      <hr />
+      <button class="c-button c-button--primary" @click="incrementPinia">Increment Count (Pinia)</button>
+      <button class="c-button c-button--primary" @click="decrementPinia">Decrement Count (Pinia)</button>
     </header>
     <nav class="profile-app__nav">
       <router-link :to="{ name: 'profile-overview' }">Overview</router-link>
@@ -70,6 +74,16 @@ export default {
       if (this.$microActions && typeof this.$microActions.pushSharedState === 'function') {
         this.$microActions.pushSharedState(partial);
       }
+    },
+    incrementPinia() {
+      this.useBridgeStore.$patch({
+        counter: this.useBridgeStore.counter + 1
+      });
+    },
+    decrementPinia() {
+      this.useBridgeStore.$patch({
+        counter: this.useBridgeStore.counter - 1
+      });
     },
   }
 };
