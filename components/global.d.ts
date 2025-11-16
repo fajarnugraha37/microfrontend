@@ -35,6 +35,44 @@ export const useVuexStore: (vue: typeof import('vue'), globalStore: import('vuex
 export const useDerivedStore: (pinia: import('pinia').Pinia, namespace: string, options?: Record<string, any>) => () => import('pinia').Store<any, any>;
 export const usePiniaStore: (pinia: import('pinia').Pinia) => { install(app: any, options?: Record<string, any>): void };
 
+// bus API
+export class DomEventBus {
+  constructor(target: any, options?: {
+    prefix?: string;
+    bubbles?: boolean;
+    composed?: boolean;
+    cancelable?: boolean;
+  });
+  on(type: string, handler: (detail: any, ev?: CustomEvent) => void, options?: boolean | AddEventListenerOptions): () => void;
+  once(type: string, handler: (detail: any, ev?: CustomEvent) => void, options?: boolean | AddEventListenerOptions): () => void;
+  off(type: string, listener: EventListener, options?: boolean | EventListenerOptions): void;
+  emit(type: string, detail?: any, init?: CustomEventInit): void;
+  removeAllListeners(type?: string): void;
+  destroy(): void;
+}
+
+export class MfeEventBus {
+  constructor(target: any, options?: { prefix?: string; defaultTimeout?: number; debug?: boolean; bubbles?: boolean; composed?: boolean; cancelable?: boolean });
+  onEvent(eventName: string, handler: (payload: any) => void): () => void;
+  onceEvent(eventName: string, handler: (payload: any) => void): () => void;
+  emitEvent(eventName: string, payload?: any): void;
+  handle(method: string, handler: (params: any) => Promise<any> | any): () => void;
+  request(method: string, params?: any, options?: { timeout?: number }): Promise<any>;
+  destroy(): void;
+}
+
+export class MicrofrontBus {
+  constructor(target: any, options?: { prefix?: string; defaultTimeout?: number; debug?: boolean });
+  onEvent(eventName: string, handler: (payload: any) => void): () => void;
+  onceEvent(eventName: string, handler: (payload: any) => void): () => void;
+  emitEvent(eventName: string, payload?: any): void;
+  handle(method: string, handler: (params: any) => Promise<any> | any): () => void;
+  request(method: string, params?: any, options?: { timeout?: number }): Promise<any>;
+  destroy(): void;
+}
+
+export const bus: MicrofrontBus;
+export const mfeEventBus: MfeEventBus;
 declare const _default: {
   install(Vue: typeof import('vue')): void;
   CButton: typeof CButton;
@@ -65,6 +103,8 @@ declare global {
     globalStore: import("vuex").Store<any>;
     bridgeStore: import("pinia").Store<string, any>;
     derivedStore: Record<string, import("pinia").Store<any>>;
+    bus?: MicrofrontBus;
+    mfeEventBus?: MfeEventBus;
 
     useVuexStore: (vuex: typeof import("vue").VueConstructor, globalStore: import("vuex").Store<string, any>, callback?: (store: import("vuex").Store<string, any>) => void) => void;
     useBridgeStore: () => import("pinia").Store<any>;

@@ -18,6 +18,10 @@ import {
   usePiniaStore, 
   useVuexStore 
 } from "./stores";
+import {
+  bus,
+  mfeEventBus
+} from "./bus";
 
 const components = [CButton, CInput];
 
@@ -48,7 +52,9 @@ export {
   createVuexRootPiniaBridge,
   registerBridges, useDerivedStore,
   usePiniaStore,
-  useVuexStore
+  useVuexStore,
+  bus,
+  mfeEventBus
 };
 
 export default {
@@ -64,5 +70,7 @@ export default {
   createVuexRootPiniaBridge,
   registerBridges, useDerivedStore,
   usePiniaStore,
-  useVuexStore
+  useVuexStore,
+  bus,
+  mfeEventBus
 };

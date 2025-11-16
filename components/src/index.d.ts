@@ -11,6 +11,8 @@ export * from './utils';
 // re-export stores
 export * from './stores';
 
+export * from './bus';
+
 declare const _default: {
   install(Vue: typeof import('vue')): void;
   CButton: typeof CButton;
