@@ -12,6 +12,7 @@ import * as pinia from 'pinia';
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import App from './App.vue';
 import router from './router';
+import { usePiniaStore } from 'mfe-components';
 
 /**
  * @type {import('vue').App}
@@ -35,13 +36,19 @@ function render(props = {}) {
         globalStore: globalStore,
       },
       mounted() {
+        console.info('[app-profile] mounted hook in App.vue');
       }
     });
 
     app.use(piniaInstance);
-    app.use(window.usePiniaStore(pinia), {
+    app.use(usePiniaStore(pinia, piniaInstance), {
       'config': {},
     });
+    app.use({
+      install(appInstance, options) {
+        console.info('[app-profile] install plugin with options', options);
+      }
+    })
     app.use(router);
     for (const pluginInstall of window._pluginRegistry.filter(item => item.plugin.type == 'global')) {
       const plugin = pluginInstall.plugin;
@@ -74,10 +81,12 @@ export async function bootstrap() {
 }
 
 export async function mount(props) {
+  console.info('[app-profile] mount with props', props);
   render(props);
 }
 
 export async function unmount() {
+  console.info('[app-profile] unmount');
   if (instance) {
     instance.unmount();
     instance._container.innerHTML = '';
@@ -87,4 +96,5 @@ export async function unmount() {
 
 export async function update(props) {
   console.info('[app-profile] update props', props);
+  render(props);
 }
