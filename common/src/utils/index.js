@@ -31,6 +31,10 @@ export const utils = {
 
 export const useUtilities = (vue) => {
   vue.use(new class UtilitiesPlugin {
+    version = 'vue-2';
+    type = 'global';
+    name = 'Global-Utilities';
+
     install(Vue) {
       Vue.prototype.$utils = utils;
     }

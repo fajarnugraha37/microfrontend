@@ -15,20 +15,27 @@ import sgNumberValidator from "./extensions/sgNumberValidator";
 import dictionary from "./dictionary";
 
 export const useValidators = (vue) => {
-    // Vue use vee-validate package
-    vue.use(VeeValidate);
+    vue.use(new class CustomValidatorPlugin {
+        version = 'vue-2';
+        type = 'global';
+        name = 'Validator-Vee-Validate-2';
 
-    Validator.localize(dictionary);
+        install(Vue) {
+            // Vue use vee-validate package
+            Vue.use(VeeValidate);
 
-    // Extend validator to use custom validator rule
-    Validator.extend("validPassword", passwordValidator);
-    Validator.extend("fileNumber", fileNumberValidator);
-    Validator.extend("fileSize", fileSizeValidator);
-    Validator.extend("fileFormat", fileFormatValidator);
-    Validator.extend("nric", nricValidator);
-    Validator.extend("fin", finValidator);
-    Validator.extend("uen", uenValidator);
-    Validator.extend("nric_fin", nricFinValidator);
-    Validator.extend("sgNumber", sgNumberValidator);
+            Validator.localize(dictionary);
 
+            // Extend validator to use custom validator rule
+            Validator.extend("validPassword", passwordValidator);
+            Validator.extend("fileNumber", fileNumberValidator);
+            Validator.extend("fileSize", fileSizeValidator);
+            Validator.extend("fileFormat", fileFormatValidator);
+            Validator.extend("nric", nricValidator);
+            Validator.extend("fin", finValidator);
+            Validator.extend("uen", uenValidator);
+            Validator.extend("nric_fin", nricFinValidator);
+            Validator.extend("sgNumber", sgNumberValidator);
+        }
+    });
 }

@@ -18,6 +18,10 @@ import { createGlobalPiniaStoreFromVuex } from "./createGlobalPiniaStoreFromVuex
 // -----------------------------------------------------------------------------
 export const useVuexStore = window.useVuexStore = (vue, globalStore, callback) => {
     vue.use(new class VuexStorePlugin {
+        version = 'vue-2';
+        type = 'vuex-3';
+        name = 'Store-Vuex-3';
+
         /**
          * @param {import('vue').VueConstructor} Vue 
          */
@@ -42,6 +46,10 @@ export const useDerivedStore = window.useDerivedStore = (pinia, namespace, optio
 }
 
 export const usePiniaStore = window.usePiniaStore = (pinia) => (new class PiniaStorePlugin {
+    version = 'vue-3';
+    type = 'pinia-3';
+    name = 'Store-Pinia-3';
+    
     /**
      * @param {any} app 
      * @param {{ [key: string]: Record<string, any> }} options 
