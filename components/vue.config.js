@@ -1,3 +1,7 @@
+
+/**
+ * @type {import('@vue/cli-service').ProjectOptions}
+ */
 module.exports = {
   /** @type {import('webpack').Configuration} */
   configureWebpack: {
