@@ -47,22 +47,20 @@ export const useProfileStore = defineStore("profile", () => {
     setSharedShell,
     sharedUser
   };
+}, {
+  persist: {
+    key: 'app-profile.profile',
+    debug: true,
+    storage: localStorage,
+    beforeHydrate: (context) => {
+      console.log('[Pinia PersistedState] beforeHydrate', context);
+    },
+    afterHydrate: (context) => {
+      console.log('[Pinia PersistedState] afterHydrate', context);
+    },
+  },
 });
 
-export const store = {
-  /**
-   * @param {import('pinia').Pinia} pinia 
-   */
-  attachModule: (pinia) => {
-    store.value = pinia;
-  },
-  /**
-   * @param {import('pinia').Pinia} pinia 
-   */
-  detachModule: (pinia) => {
-    store.value = null;
-  },
-  value: null
+export default {
+  useProfileStore,
 };
-
-export default store;

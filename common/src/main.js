@@ -62,7 +62,6 @@ useUtilities(window.Vue);
 useMixins(window.Vue);
 useValidators(window.Vue);
 useVuexStore(window.Vue, globalStore, (store) => {
-  store.dispatch('schedularIncrement');
 });
 useRouter(window.Vue);
 

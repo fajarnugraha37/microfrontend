@@ -9,6 +9,7 @@ if (window.__POWERED_BY_QIANKUN__) {
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import * as pinia from 'pinia';
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import App from './App.vue';
 import router from './router';
 
@@ -27,6 +28,7 @@ function render(props = {}) {
     // store.attachModule(parentStore);
     // store.attachModule(globalStore);
     const piniaInstance = createPinia();
+    piniaInstance.use(piniaPluginPersistedstate);
     const app = createApp(App, {
       props: {
         store: parentStore,
@@ -35,11 +37,25 @@ function render(props = {}) {
       mounted() {
       }
     });
+
     app.use(piniaInstance);
     app.use(window.usePiniaStore(pinia), {
       'config': {},
     });
     app.use(router);
+    for (const pluginInstall of window._pluginRegistry.filter(item => item.plugin.type == 'global')) {
+      const plugin = pluginInstall.plugin;
+      const args = plugin.args || [];
+      console.info(`[app-profile] installed global plugin ${plugin.name}@${plugin.version}`, plugin, args);
+      app.use(plugin.install, ...args);
+    }
+    app.mixin({
+      methods: {
+        myGlobalMethod(msg) {
+          console.log("[global]", msg);
+        },
+      },
+  });
     app.mount(container ? container.querySelector('#app') : '#app');
     instance = app;
   } catch (error) {

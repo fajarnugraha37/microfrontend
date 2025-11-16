@@ -75,7 +75,7 @@ export const globalStore = {
   plugins: [
     createPersistedState({
       key: 'common-shell',
-      paths: ['token', 'user', 'config']
+      paths: ['token', 'user', 'config', 'auth', 'product']
     })
   ]
 };

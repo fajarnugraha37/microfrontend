@@ -4,8 +4,20 @@ import globalActions from '../state';
 
 export default {
   computed: {
-    ...mapGetters(['isAuthenticated', 'username']),
-    ...mapState(['user', 'token']),
+    // ...mapGetters(['isAuthenticated', 'username']),
+    // ...mapState(['user', 'token']),
+    isAuthenticated() {
+      return this.$store.getters["isAuthenticated"];
+    },
+    username() {
+      return this.$store.getters["username"];
+    },
+    user() {
+      return this.$store.getters["user"];
+    },
+    token() {
+      return this.$store.getters["token"];
+    },
     globalUser() {
       return this.user || (globalActions.getGlobalState().user || null);
     },
@@ -48,6 +60,7 @@ export default {
     }
   },
   mounted() {
+    console.log('GlobalStateMixin mounted: user=', this.$store);
     // Sync Vuex and global state on mount
     if (this.user && this.token) {
       this.setGlobalState({ user: this.user, token: this.token, lastLogin: this.user.lastLogin || null });

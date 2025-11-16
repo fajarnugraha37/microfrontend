@@ -20,9 +20,9 @@ export const useValidators = (vue) => {
         type = 'global';
         name = 'Validator-Vee-Validate-2';
 
-        install(Vue) {
+        install(app, options) {
             // Vue use vee-validate package
-            Vue.use(VeeValidate);
+            vue.use(VeeValidate);
 
             Validator.localize(dictionary);
 

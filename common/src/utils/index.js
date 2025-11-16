@@ -35,8 +35,12 @@ export const useUtilities = (vue) => {
     type = 'global';
     name = 'Global-Utilities';
 
-    install(Vue) {
-      Vue.prototype.$utils = utils;
+    install(app) {
+      if (!app?.config?.globalProperties) {
+        app.prototype.$utils = utils;
+      } else {
+        app.config.globalProperties.$utils = utils;
+      }
     }
   })
-}
+};
