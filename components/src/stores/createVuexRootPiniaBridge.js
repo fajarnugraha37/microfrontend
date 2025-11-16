@@ -27,7 +27,6 @@ export function createVuexRootPiniaBridge({ vuex, piniaStore }) {
     syncingFromVuex = false;
 
     // vuex root -> pinia partial patch
-
     const unSubVuex = vuex.subscribe((
         /** @type {{ type: string; }} */ mutation, /** @type {Record<string, any>} */ state) => mutex.runExclusive(() => {
             try {
