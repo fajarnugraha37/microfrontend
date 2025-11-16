@@ -12,6 +12,8 @@
       <div class="profile-app__user" v-else>
         Awaiting authentication from shell...
       </div>
+      <button @click="increment">Increment Count</button>
+      <button @click="decrement">Decrement Count</button>
     </header>
     <nav class="profile-app__nav">
       <router-link :to="{ name: 'profile-overview' }">Overview</router-link>
@@ -68,7 +70,7 @@ export default {
       if (this.$microActions && typeof this.$microActions.pushSharedState === 'function') {
         this.$microActions.pushSharedState(partial);
       }
-    }
+    },
   }
 };
 </script>

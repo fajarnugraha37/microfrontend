@@ -1,5 +1,5 @@
 // Unified mixin for auth, config, and global state integration
-import { mapGetters, mapState, mapActions } from 'vuex';
+import { mapGetters, mapState, mapActions, mapMutations } from 'vuex';
 import globalActions from '../state';
 
 export default {
@@ -18,6 +18,7 @@ export default {
   },
   methods: {
     ...mapActions(['login', 'logout']),
+    ...mapMutations(['increment', 'decrement']),
     setGlobalState(state) {
       globalActions.setGlobalState(state);
     },
