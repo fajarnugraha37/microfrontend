@@ -16,6 +16,96 @@ The bridging approach focuses on enabling partial migration: keep Vuex (root) an
 
 ---
 
+## Problem Statement
+
+Many large codebases and microfrontend ecosystems have multiple independent applications (host / shell + child MFEs) that rely on a *shared global state* — historically hosted as a Vuex root store. Migrating every application at once to Vue 3 and Pinia is often impractical. The challenges include:
+
+- Different app lifecycles and deployment velocities for each microfrontend team.
+- Host and microfrontend tech mismatch: the host may stay Vue 2 (Vuex) while microfrontends upgrade to Vue 3 (Pinia) incrementally.
+- Shared domain logic that must remain consistent across app boundaries (user session, auth, cart, settings).
+- Minimizing runtime disruptions and avoiding double-state scenarios, especially while both Vuex and Pinia live in the same runtime.
+- Opt-in state migration per module or per MFE without global refactors.
+- Maintaining developer DX (autocompletion, typed interfaces) and minimizing runtime bundle/interop issues.
+
+The core problem: How to let microfrontends migrate to Pinia without breaking existing Vuex consumers, while maintaining consistent and correct state synchronization and avoiding race conditions or data loss.
+
+---
+
+## Brief Solutions (Overview)
+
+Below are common strategies to solve the above challenges along with a short summary of tradeoffs and recommended scenarios.
+
+1) **Two-way Bridge (this repository pattern)**
+   - Description: Keep the host's Vuex store, and expose a set of utilities that create per-module Pinia stores in microfrontends and sync state both ways.
+   - Pros:
+     - Incremental migration: migrate a single module or MFE at a time.
+     - Minimal host code changes — the host holds the single source of truth until cutover.
+     - Microfrontends can use reactive Pinia stores and enjoy modern developer tooling.
+   - Cons:
+     - Complexity: locks to avoid cycles, diff/patch logic, potential performance overhead for frequent or large updates.
+     - Requires mutations (`BRIDGE_REPLACE_*`) on host modules and `window` global references by default.
+   - Best for: Large, distributed teams and gradual migration where the host cannot be upgraded to Vue 3 immediately.
+
+2) **Full Host Migration to Pinia**
+   - Description: Migrate the host first to Pinia (Vue 3), then standardize microfrontends to use the same Pinia stores or shared modules.
+   - Pros:
+     - Long-term simplification: reduces the need for bridging code and `window` globals.
+     - Better type & tooling uniformity across projects.
+   - Cons:
+     - Host migration may be expensive and risky if the host has tight coupling with Vue 2 / Vuex or lots of legacy code.
+   - Best for: When the host can be updated / refactored in a planned release and teams are ready for a more coherent future state.
+
+3) **One-way Sync or Temporary Mirror**
+   - Description: Only mirror Vuex -> Pinia (read-only) or Pinia -> Vuex (write-only) during a period of migration to lower complexity.
+   - Pros:
+     - Reduced complexity and avoid loops.
+     - Can be used as a stepping-stone for a controlled migration.
+   - Cons:
+     - Two-way coherence not guaranteed — more careful planning of where write traffic occurs.
+   - Best for: When you want to guarantee no accidental writes from the newer store; can be used to test and stabilize behavior.
+
+4) **Backend/Server-driven State (no shared runtime store)**
+   - Description: Avoid runtime shared state — move to server-driven state or a sync API that allows each app to request what it needs.
+   - Pros:
+     - Simplifies runtime interactions; apps become decoupled and rely on a central API/service.
+     - Ideal for multi-platform setups.
+   - Cons:
+     - Increased API traffic and potential latency; not ideal for high-frequency UI updates.
+     - More significant architecture change.
+   - Best for: Larger system migrations where shared runtime state is undesirable or where cross-app state should be centralized in a shared service.
+
+5) **Event-Bus / Message-based Interop**
+   - Description: Use a cross-app event bus (`postMessage` in iframes, or in-window event bus) to propagate changes instead of synching stores.
+   - Pros:
+     - Looser coupling: only exchange intents or events not entire state object.
+   - Cons:
+     - Need to implement idempotency and state reconciliation in event handlers.
+   - Best for: Use cases where apps need only occasional or discrete updates; not suitable for large object graphs requiring precise syncing.
+
+6) **Shared Module/Dependency with Consumer Exports**
+   - Description: Publish shared stores (Pinia) as an NPM module or package that host + MFEs import and configure to ensure a single owner of state.
+   - Pros:
+     - Clear single source of truth; developer-friendly imports and typed usage.
+   - Cons:
+     - Requires packaging & versioning discipline; may not work during incremental migration without a bridging layer.
+   - Best for: When you can coordinate versioning and release cycles across MFEs and host.
+
+---
+
+## Recommended Approach & Rationale
+
+For incremental migrations where the host remains Vue 2 for a period of time, the Two-way Bridge approach (the one in this repository) is typically the most pragmatic solution:
+
+- It enables per-module migration without forcing a big-bang host upgrade, which reduces risk.
+- It allows microfrontend teams to use modern tooling (Pinia) while retaining the host as the single source of truth.
+- The tradeoffs (diff/patch logic, lazy bridge creation, mutex) are manageable and can be mitigated by monitoring, limiting diff sizes, and proper testing.
+
+Once all MFEs and internal host modules are migrated to Pinia and the host is also upgraded to Vue 3, move to a shared Pinia model and remove the bridging layer (see Post-Migration Cleanup above).
+
+---
+
+---
+
 ## Files
 
 - `src/stores/index.js` — Main exports & runtime helper entry points used by `mfe-components`. Exports bridging utilities and convenience helpers.
