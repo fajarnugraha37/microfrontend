@@ -65,7 +65,7 @@ export function createVuexRootPiniaBridge({ vuex, piniaStore }) {
                     console.debug(`[Pinia->Vuex] syncing root state ${mutation.storeId}@${mutation.type}:`, mutation.payload);
                     vuex.commit("BRIDGE_REPLACE_ROOT_STATE", mutation.payload);
                 } else {
-                    console.warn('[Pinia->Vuex] skipping mutation without payload:', mutation);
+                    console.debug('[Pinia->Vuex] skipping mutation without payload:', mutation);
                 }
             } finally {
                 syncingFromPinia = false;

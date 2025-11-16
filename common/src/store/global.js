@@ -30,7 +30,6 @@ export const globalStore = {
       state.token = null;
     },
     setConfig(state, config) {
-      console.log('[Vuex] setConfig mutation called:', config);
       state.config = config;
     },
     increment(state) {
@@ -38,7 +37,6 @@ export const globalStore = {
       state.counter++
       if (state.user) {
         state.user.name = state.user.name + ' ' + state.counter;
-        console.log('[Vuex] incremented counter and updated user name to:', state.user.name);
       }
     },
     decrement(state) {
