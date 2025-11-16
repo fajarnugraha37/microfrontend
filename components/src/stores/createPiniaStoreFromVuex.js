@@ -18,6 +18,7 @@ import { createVuexModulePiniaBridge } from './createVuexModulePiniaBridge';
  * vuex module must have mutation BRIDGE_REPLACE_STATE.
  *
  * @param {import('pinia')} pinia
+ * @param {import('pinia').Pinia} piniaInstance
  * @param {import('.').VuexStore} vuex
  * @param {string} namespace - vuex module namespace, e.g. "user" or "account/profile"
  * @param {object} [options]
@@ -25,7 +26,7 @@ import { createVuexModulePiniaBridge } from './createVuexModulePiniaBridge';
  * @param {(initialState: any) => any} [options.mapState] - optional mapper: vuexState -> piniaState
  * @returns {() => import('pinia').Store} pinia useStore fn
  */
-export function createPiniaStoreFromVuex(pinia, vuex, namespace, options = {}) {
+export function createPiniaStoreFromVuex(pinia, piniaInstance, vuex, namespace, options = {}) {
     const id = options.id || namespace;
 
     const initialModuleState = getModuleState(vuex.state, namespace) || {};
@@ -50,10 +51,12 @@ export function createPiniaStoreFromVuex(pinia, vuex, namespace, options = {}) {
      * @returns {import('pinia').Store}
      */
     function useBridgedStore() {
-        const store = useBaseStore();
+        const store = useBaseStore(piniaInstance);
+        console.debug(`[Vuex<->Pinia] useBridgedStore for namespace "${namespace}"@${store.$id}`);
 
         if (!bridgeCreated) {
             bridgeCreated = true;
+            console.debug(`[Vuex<->Pinia] Creating ${namespace} vuex-pinia bridge`);
             disposeBridge = createVuexModulePiniaBridge({
                 vuex,
                 namespace,

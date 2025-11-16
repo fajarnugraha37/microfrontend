@@ -12,13 +12,14 @@ import { createVuexRootPiniaBridge } from './createVuexRootPiniaBridge';
  *   - vuex root must have mutation BRIDGE_REPLACE_ROOT_STATE(state, newState)
  *
  * @param {import('pinia')} pinia
+ * @param {import('pinia').Pinia} piniaInstance
  * @param {import('.').VuexStore} vuex
  * @param {object} [options]
  * @param {string} [options.id] - pinia id (default: 'global')
  * @param {(rootState: Record<string, any>) => any} [options.mapState] - optional mapper: vuexRoot -> piniaRoot
  * @returns {() => import('pinia').Store} pinia useStore fn
  */
-export function createGlobalPiniaStoreFromVuex(pinia, vuex, options = {}) {
+export function createGlobalPiniaStoreFromVuex(pinia, piniaInstance, vuex, options = {}) {
     const id = options.id || "global";
 
     const baseInitialState = options.mapState
@@ -36,7 +37,8 @@ export function createGlobalPiniaStoreFromVuex(pinia, vuex, options = {}) {
     let bridgeCreated = false;
 
     function useBridgedStore() {
-        const store = useBaseStore();
+        const store = useBaseStore(piniaInstance);
+        console.debug(`[Vuex<->Pinia] useBridgedStore for namespace "global"@${store.$id}`);
 
         if (!bridgeCreated) {
             bridgeCreated = true;

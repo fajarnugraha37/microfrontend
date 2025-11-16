@@ -1,6 +1,6 @@
 {
   "name": "mfe-components",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "private": false,
   "main": "dist/mfe-components.umd.js",
   "module": "dist/mfe-components.common.js",
