@@ -41,22 +41,36 @@ export const useDerivedStore = window.useDerivedStore = (pinia, namespace, optio
     return createPiniaStoreFromVuex(pinia, window.globalStore, namespace, options);
 }
 
-export const usePiniaStore = window.usePiniaStore = (pinia) => (new class PiniaStorePlugin {
+/**
+ * Create a Vue 3 plugin that mirrors Vuex into Pinia and sets up derived stores.
+ * @param {import('pinia')} pinia
+ * @param {{ enableCrossTabSync?: boolean, crossTabChannelName?: string, crossTabThrottleMs?: number, enableLocalStorageFallback?: boolean }} [pluginOptions]
+ */
+export const usePiniaStore = window.usePiniaStore = (pinia, pluginOptions = {}) => (new class PiniaStorePlugin {
     /**
      * @param {any} app 
      * @param {{ [key: string]: Record<string, any> }} options 
      */
-    install(app, options) {
-        const bridgeStore = createGlobalPiniaStoreFromVuex(pinia, window.globalStore);
+    install(app, options = {}) {
+        // bridge factory will be created below with plugin options
+        const bridgeOpts = Object.assign({}, pluginOptions || {}, options && options.bridge ? options.bridge : {});
+        const bridgeStore = createGlobalPiniaStoreFromVuex(pinia, window.globalStore, bridgeOpts);
+
         /** @type {Record<string, import("pinia").Store<any, any>>} */
         const derivedStore = {};
-
         const namespaces = Object.keys(window.store._modulesNamespaceMap)
             .map((ns) => ns.replace(/\/$/, ""));
         console.log('[Vuex] Found vuex modules for bridging:', namespaces);
         for (const namespace of namespaces) {
             const opts = (options && options[namespace]) ?? {};
-            const store = createPiniaStoreFromVuex(pinia, window.globalStore, namespace, opts);
+            // merge plugin-level options for cross-tab into a store-level options
+            const storeOpts = Object.assign({}, opts, {
+                enableCrossTabSync: (pluginOptions && pluginOptions.enableCrossTabSync) !== false,
+                crossTabChannelName: pluginOptions && pluginOptions.crossTabChannelName,
+                crossTabThrottleMs: pluginOptions && pluginOptions.crossTabThrottleMs,
+                enableLocalStorageFallback: pluginOptions && pluginOptions.enableLocalStorageFallback,
+            });
+            const store = createPiniaStoreFromVuex(pinia, window.globalStore, namespace, storeOpts);
             derivedStore[namespace] = store;
             app.provide(`$.derivedStore.${namespace}`, store);
             console.log(`[Vuex] Created Pinia bridge store for module: ${namespace}`);
@@ -64,6 +78,7 @@ export const usePiniaStore = window.usePiniaStore = (pinia) => (new class PiniaS
 
         app.config.globalProperties.$parentStore = window.store;
         app.config.globalProperties.$globalStore = window.globalStore;
+        // create bridgeStore options merged with plugin-level defaults
         app.config.globalProperties.$bridgeStore = window.bridgeStore = bridgeStore;
         app.config.globalProperties.$derivedStore = window.derivedStore = derivedStore;
         app.provide('parentStore', window.store);

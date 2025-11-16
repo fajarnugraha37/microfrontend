@@ -1,6 +1,7 @@
 // @ts-check
 import { getModuleState } from '../utils';
 import { createVuexModulePiniaBridge } from './createVuexModulePiniaBridge';
+import { setupCrossTabSync } from './crossTabSync';
 
 
 /**
@@ -21,9 +22,13 @@ import { createVuexModulePiniaBridge } from './createVuexModulePiniaBridge';
  * @param {import('.').VuexStore} vuex
  * @param {string} namespace - vuex module namespace, e.g. "user" or "account/profile"
  * @param {object} [options]
+ * @param {boolean} [options.enableCrossTabSync] - enable cross-tab sync for this store (default true)
+ * @param {string} [options.crossTabChannelName] - BroadcastChannel name (default 'mfe-pinia-sync')
+ * @param {number} [options.crossTabThrottleMs] - throttle time for cross-tab broadcasts
+ * @param {boolean} [options.enableLocalStorageFallback] - fallback to localStorage if BroadcastChannel unavailable
  * @param {string} [options.id] - pinia store id (default = namespace)
  * @param {(initialState: any) => any} [options.mapState] - optional mapper: vuexState -> piniaState
- * @returns {() => import('pinia').Store} pinia useStore fn
+ * @returns {() => import('pinia').Store<any, any>} pinia useStore fn
  */
 export function createPiniaStoreFromVuex(pinia, vuex, namespace, options = {}) {
     const id = options.id || namespace;
@@ -43,6 +48,8 @@ export function createPiniaStoreFromVuex(pinia, vuex, namespace, options = {}) {
 
     /** @type {null | (() => void)} */
     let disposeBridge = null;
+    /** @type {null | (() => void)} */
+    let disposeCrossTab = null;
     let bridgeCreated = false;
 
     /**
@@ -59,6 +66,20 @@ export function createPiniaStoreFromVuex(pinia, vuex, namespace, options = {}) {
                 namespace,
                 piniaStore: store,
             });
+            // cross-tab sync (enabled by default unless explicitly disabled)
+            const enableCrossTab = (options && options.enableCrossTabSync) !== false;
+            if (enableCrossTab) {
+                try {
+                    disposeCrossTab = setupCrossTabSync(store, {
+                        channelName: (options && options.crossTabChannelName),
+                        throttleMs: (options && options.crossTabThrottleMs),
+                        enableLocalStorageFallback: (options && options.enableLocalStorageFallback),
+                    });
+                } catch (e) {
+                    // ignore if host doesn't support BroadcastChannel or other errors
+                    console.warn('[CrossTab] failed to setup cross-tab sync for', namespace, e);
+                }
+            }
         }
 
         return store;
@@ -68,6 +89,7 @@ export function createPiniaStoreFromVuex(pinia, vuex, namespace, options = {}) {
     // @ts-ignore
     useBridgedStore.disposeBridge = () => {
         if (disposeBridge) disposeBridge();
+        if (disposeCrossTab) disposeCrossTab();
     };
 
     return useBridgedStore;

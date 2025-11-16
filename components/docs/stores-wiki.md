@@ -396,6 +396,138 @@ Q: "Do I need to use `window` in my code?"
 
 ---
 
+## Multiple Tabs / Multi-window Behavior
+
+### Default behavior
+
+Out of the box, the bridge utilities assume a single-page context (a single runtime) in a tab: `window.store` and `window.globalStore` are created per browser tab. That means:
+
+- Each browser tab has its own in-memory Vuex/Pinia stores.
+- Bridge synchronization is in-process (within the tab) and does not automatically propagate changes across different tabs or browser windows.
+
+So, if you open multiple tabs of your app, each tab will maintain its own state: changes in one tab will not be automatically reflected in other tabs unless you add cross-tab synchronization.
+
+### Do you need cross-tab sync? (common scenarios)
+
+- You should add cross-tab sync if you need a single, consistent state across tabs (e.g., shopping cart, shared session flags) and user expectation is that all tabs show the same state.
+- If per-tab state or isolation is acceptable (or required), keep the default behavior — it's simpler and avoids cross-tab coupling.
+
+### How to add cross-tab synchronization
+
+Below are practical ways to synchronize store updates across tabs — pick one based on browser support, compatibility and whether you need granular diffs or fully consistent state.
+
+1) BroadcastChannel API (recommended for modern browsers)
+- Pros: clean, structured-clone messages, low-latency, easy to implement.
+- Cons: requires modern browsers; not supported in very old browser versions.
+
+Example integration (Pinia side, basic outline):
+
+```js
+// createBroadcastSync.js
+export function setupBroadcastSyncForPiniaStore(store, channelName) {
+  const bc = new BroadcastChannel(channelName);
+  // A simple sender id to avoid self-echo
+  const senderId = `${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+
+  // listen for external messages
+  bc.onmessage = (ev) => {
+    const { originId, type, payload } = ev.data || {};
+    if (!originId || originId === senderId) return; // ignore our own messages
+    // Example: full state replacement or diff
+    if (type === 'pinia:patch') {
+      // apply without triggering another outbound event
+      store.$patch(payload);
+    }
+  };
+
+  // subscribe to Pinia store changes and broadcast them
+  store.$subscribe(({ storeId, type }, state) => {
+    // Send minimal payloads to avoid high traffic; payload can be a delta
+    const payload = state; // or use a diffing approach
+    bc.postMessage({ originId: senderId, type: 'pinia:patch', payload });
+  });
+  return () => bc.close();
+}
+```
+
+2) localStorage + Storage Events (good compatibility)
+- Pros: works on legacy browsers and is supported widely.
+- Cons: String-only (JSON required), larger payloads can be slow; firing `storage` events across iframes/tabs is reliable but can be rate-limited or perform poorly for frequent updates.
+
+Example:
+
+```js
+// localStorage sync
+function broadcastViaLocalStorage(key, payload) {
+  localStorage.setItem(key, JSON.stringify({ t: Date.now(), p: payload }));
+  // Some browsers omit 'storage' event in same tab, so you may want to notify via a local event or direct app hook
+}
+
+window.addEventListener('storage', (ev) => {
+  if (ev.key !== 'mfe:pinia-sync') return;
+  try {
+    const { t, p } = JSON.parse(ev.newValue);
+    // apply to local store
+    myStore.$patch(p);
+  } catch (e) { console.warn('invalid state from storage', e); }
+});
+```
+
+3) SharedWorker or Service Worker
+- Pros: Suitable for cross-origin frames or more advanced messaging scenarios.
+- Cons: Complexity and server / worker setup cost; not necessary for most simple cases.
+
+4) Server-based sync / backend API
+- Pros: Best for cross-user, cross-device constancy.
+- Cons: Higher latency, complexity; not necessary for in-browser tab sync.
+
+### Avoiding echo & reentrancy
+
+When implementing cross-tab sync use a sender id or origin tag to avoid applying messages you originated and re-broadcasting them (echo). A common pattern is to attach a uuid or numeric id to messages and ignore messages with your own id.
+
+Also consider using short-circuit flags (like `syncingFromBroadcast`) to avoid cycles where receiving a remote patch triggers a propagate event.
+
+### Diffing vs Full-State Patches
+
+- For small state updates, broadcasting minimal deltas is more efficient and reduces data transfer.
+- For simplicity, you can broadcast the full store snapshot, but large root states can cause performance and bandwidth problems.
+- Mitigate risk by compressing payloads or sending only relevant module slices.
+
+### Practical recommendations
+
+- If you support modern browsers only: prefer `BroadcastChannel` — simple, fast and reliable for same-origin tabs.
+- If you need broad compatibility: implement `storage` event fallback to use `localStorage`.
+- Manage event frequency: throttle or debounce updates to avoid flooding channels with mutations.
+- Provide robust tests for race conditions: multiple tabs making frequent updates should not diverge or oscillate.
+- Ensure security policies: if using `postMessage`/broadcast across frames, verify origin and message content.
+
+### Integration with `mfe-components` bridge
+
+- If you use this repository's bridge, you can add a cross-tab sync as a small, decoupled plugin that listens to Pinia changes and broadcasts them; other tabs will apply patches to their local Pinia stores. Because the bridge already handles in-tab sync (`Pinia -> Vuex` and `Vuex -> Pinia`), cross-tab sync should be layered so that:
+  - A tab that receives a cross-tab message applies it to its Pinia store (or commits to Vuex) and the normal bridge sync logic keeps in-process bridges consistent.
+  - Avoid double-echo loops: tag messages via `originId` and set `syncingFromBroadcast` flags as necessary.
+
+---
+
+## Example: Add BroadcastChannel support in the bridge plugin
+
+The `usePiniaStore` plugin includes cross-tab synchronization support enabled by default. You can configure it or disable it via plugin options when needed. If you want, I can add or improve the plugin to add more advanced options; by default it sets up a BroadcastChannel and a `localStorage` fallback. It would:
+
+- Listen to generated Pinia `$subscribe` events and send a message with store id and payload.
+- On receiving a message, find the matching Pinia store or module and apply the patch via `$patch` or commit to Vuex.
+- Use `originId` to avoid echo and short-circuit flags to prevent re-propagation.
+
+Example opt-in API:
+
+```js
+app.use(usePiniaStore(pinia, { enableCrossTabSync: true, channelName: 'mfe-pin:1' }));
+```
+
+Would you like me to implement an opt-in BroadcastChannel plugin as part of the `mfe-components` library and wire a fallback to `localStorage`? If so, I can add it as a small module and include tests and docs in the wiki with recommended configuration defaults.
+
+
+---
+
 ## Considerations & Limitations
 
 - This approach relies on the presence of `window` for the hosted and microfrontend integration. If your environment is server-side render or isolate contexts (no `window`), you must adapt the integration.

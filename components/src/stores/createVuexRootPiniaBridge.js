@@ -30,24 +30,24 @@ export function createVuexRootPiniaBridge({ vuex, piniaStore }) {
 
     const unSubVuex = vuex.subscribe((
         /** @type {{ type: string; }} */ mutation, /** @type {Record<string, any>} */ state) => mutex.runExclusive(() => {
-            try {
-                if (mutation.type === "BRIDGE_REPLACE_ROOT_STATE") return;
-                if (syncingFromPinia) return;
+        try {
+            if (mutation.type === "BRIDGE_REPLACE_ROOT_STATE") return;
+            if (syncingFromPinia) return;
 
-                syncingFromVuex = true;
-                piniaStore.$patch((/** @type {Record<string, any>} */ s) => {
-                    // find what changed?
-                    // @ts-ignore
-                    const diff = _.diff(s, state);
-                    if (Object.keys(diff).length === 0)
-                        return;
-                    console.debug('[Vuex->Pinia] syncing root state diff:', diff);
-                    deepPatch(s, diff);
-                });
-            } finally {
-                syncingFromVuex = false;
-            }
-        }),
+            syncingFromVuex = true;
+            piniaStore.$patch((/** @type {Record<string, any>} */ s) => {
+                // find what changed?
+                // @ts-ignore
+                const diff = _.diff(s, state);
+                if (Object.keys(diff).length === 0)
+                    return;
+                console.debug('[Vuex->Pinia] syncing root state diff:', diff);
+                deepPatch(s, diff);
+            });
+        } finally {
+            syncingFromVuex = false;
+        }
+    }),
         {
             detached: true,
             deep: true,
