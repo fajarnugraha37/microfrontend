@@ -3,7 +3,7 @@
     <header class="profile-app__header">
       <h2>Profile Microfrontend</h2>
       <div class="profile-app__user" v-if="isAuthenticated">
-        Viewing profile for <strong>{{ user.name }}</strong>
+        Viewing profile for <strong>{{ username }} from username</strong>
         <br />
         <code>
           Global Counter: {{ useBridgeStore.counter }}
@@ -56,18 +56,12 @@ export default {
       counter: 9999
     });
     console.log('[Pinia->Vuex] mounted.', this.useBridgeStore.counter);
-    console.log('[Pinia->Vuex] mounted.', this.$parentStore.getters['isAuthenticated']);
+    console.log('[Pinia->Vuex] mounted.', this.$store.getters['isAuthenticated']);
   },
   computed: {
     profile() {
       return this.useProfileStore.profile;
     },
-    user() {
-      return this.useBridgeStore.user;
-    },
-    isAuthenticated() {
-      return this.useBridgeStore.token !== null;
-    }
   },
   methods: {
     pushSharedState(partial = {}) {

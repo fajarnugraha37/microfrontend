@@ -53,19 +53,6 @@ export default {
     profile() {
       return this.useProfileStore.profile;
     },
-    username() {
-      return this.sharedShell && this.sharedShell.user
-        ? this.sharedShell.user.name
-        : 'Guest';
-    },
-    isAuthenticated() {
-      return this.sharedShell && this.sharedShell.isAuthenticated
-        ? this.sharedShell.isAuthenticated
-        : false;
-    },
-    user() {
-      return this.sharedShell && this.sharedShell.user ? this.sharedShell.user : null;
-    }
   }
 };
 </script>
