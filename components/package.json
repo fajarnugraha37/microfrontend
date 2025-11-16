@@ -7,7 +7,9 @@
   "files": [
     "dist",
     "src",
-    "global.d.ts"
+    "global.d.ts",
+    "docs",
+    "README.md"
   ],
   "types": "./global.d.ts",
   "exports": {
