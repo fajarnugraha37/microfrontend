@@ -3,7 +3,7 @@ const pkg = require('./package.json');
 const path = require('path');
 
 module.exports = {
-  outputDir: 'dist',
+  outputDir: 'dist.vue-cli',
   assetsDir: 'assets',
   filenameHashing: false,
 
