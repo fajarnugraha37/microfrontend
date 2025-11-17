@@ -18,8 +18,7 @@ export const useQiankun = () => {
       container: '#micro-app-container',
       activeRule: '/dashboard',
       props: {
-        store: window.store,
-        globalStore: window.globalStore,
+        store: window.$__store,
       }
     },
     {
@@ -28,8 +27,7 @@ export const useQiankun = () => {
       container: '#micro-app-container',
       activeRule: '/profile',
       props: {
-        store: window.store,
-        globalStore: window.globalStore,
+        store: window.$__store,
       }
     }
   ];

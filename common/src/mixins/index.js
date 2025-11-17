@@ -3,7 +3,7 @@ import globalStateMixin from "./globalStateMixin";
 import productMixin from "./productMixin";
 import userMixin from "./userMixin";
 
-const mixins = window.legacyMixins = {
+const mixins = window.$__legacyMixins = {
     configMixin,
     configMixin,
     globalStateMixin,
@@ -26,7 +26,7 @@ export const useMixins = (vue) => {
             } else {
                 app.config.globalProperties.$legacyMixins = mixins;
                 for (const mixin of Object.values(mixins)) {
-                    app.config.globalProperties.$store = window.store
+                    app.config.globalProperties.$store = window.$__store
                     console.log("Mixin applied:", mixin, app.config.globalProperties, Object.keys(app.config.globalProperties));
                     for (const key of Object.keys(app.config.globalProperties)) {
                         mixin[key] = app.config.globalProperties[key];
