@@ -64,7 +64,7 @@ export default defineConfig({
             return undefined
           }
           if (pakageName === pkg.name) {
-            return `${pakageName}-${Date.now()}`;
+            return `${pakageName}}`;
           }
           return `vendor/${pakageName}`;
         },
