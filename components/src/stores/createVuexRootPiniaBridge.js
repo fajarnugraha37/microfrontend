@@ -36,7 +36,6 @@ export function createVuexRootPiniaBridge({ vuex, piniaStore }) {
                 syncingFromVuex = true;
                 piniaStore.$patch((/** @type {Record<string, any>} */ s) => {
                     // find what changed?
-                    // @ts-ignore
                     const diff = _.diff(s, state);
                     if (Object.keys(diff).length === 0)
                         return;

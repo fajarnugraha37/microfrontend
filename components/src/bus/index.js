@@ -18,7 +18,7 @@ const target =
  * Shared bus instance for all MFEs.
  * Make sure bundler treats this module as a singleton.
  */
-export const bus = window.bus = new MicrofrontBus(target, {
+export const bus = window.$__bus = new MicrofrontBus(target, {
     prefix: "aceas:",     // avoid collisions with other scripts on page
     defaultTimeout: 5000, // RPC timeout
     debug: false,         // set true in dev
@@ -29,7 +29,7 @@ export const bus = window.bus = new MicrofrontBus(target, {
  * shared singleton bus.
  * make sure your bundler treats this module as a singleton across MFEs.
  */
-export const mfeEventBus = window.mfeEventBus = new MfeEventBus(target, {
+export const mfeEventBus = window.$__mfeEventBus = new MfeEventBus(target, {
     prefix: "aceas:",     // avoid collisions with other scripts
     defaultTimeout: 5000, // RPC timeout
     debug: false,         // turn on in dev

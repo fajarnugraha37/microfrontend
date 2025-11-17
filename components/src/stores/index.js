@@ -18,7 +18,7 @@ import Vuex from "vuex";
 // -----------------------------------------------------------------------------
 // Vuex and Pinia store setup helpers
 // -----------------------------------------------------------------------------
-export const useVuexStore = window.useVuexStore = (vue, globalStore, callback) => {
+export const useVuexStore = window.$__useVuexStore = (vue, globalStore, callback) => {
     vue.use(new class VuexStorePlugin {
         version = 'vue-2';
         type = 'vuex-3';
@@ -28,14 +28,13 @@ export const useVuexStore = window.useVuexStore = (vue, globalStore, callback) =
          * @param {import('vue').VueConstructor} Vue 
          */
         install(Vue) {
-            if (!window.Vuex || !window.store || !window.globalStore) {
+            if (!window.Vuex || !window.$__store) {
                 window.Vuex = Vuex;
                 /** @type {import('vuex').Store} */
                 const store = new window.Vuex.Store(globalStore);
 
                 // expose a consistent globalStore pointer for bridging convenience
-                window.store = store;
-                window.globalStore = store;
+                window.$__store = store;
                 console.debug('[PLUGIN][Vuex<->Pinia] Created Vuex global store');
             } else {
                 console.debug('[PLUGIN][Vuex<->Pinia] Vuex already installed');
@@ -43,17 +42,17 @@ export const useVuexStore = window.useVuexStore = (vue, globalStore, callback) =
 
             Vue.use(window.Vuex);
             if (callback) {
-                callback(window.store);
+                callback(window.$__store);
             }
         }
     });
 }
 
-export const useDerivedStore = window.useDerivedStore = (pinia, piniaInstance, namespace, options = {}) => {
-    return createPiniaStoreFromVuex(pinia, piniaInstance, window.globalStore, namespace, options);
+export const useDerivedStore = window.$__useDerivedStore = (pinia, piniaInstance, namespace, options = {}) => {
+    return createPiniaStoreFromVuex(pinia, piniaInstance, window.$__store, namespace, options);
 }
 
-export const usePiniaStore = window.usePiniaStore = (pinia, piniaInstance) => ({
+export const usePiniaStore = window.$__usePiniaStore = (pinia, piniaInstance) => ({
     version: 'vue-3',
     type: 'pinia-3',
     name: 'Store-Pinia-3',
@@ -65,43 +64,41 @@ export const usePiniaStore = window.usePiniaStore = (pinia, piniaInstance) => ({
     install(app, options) {
         console.debug('[PLUGIN][Vuex<->Pinia] Installing Pinia store plugin bridge');
         // expose a consistent globalStore pointer for bridging convenience
-        app.config.globalProperties.$store = window.store;
-        app.config.globalProperties.$parentStore = window.store;
-        app.config.globalProperties.$globalStore = window.globalStore;
-        app.provide('store', window.store);
-        app.provide('parentStore', window.store);
-        app.provide('globalStore', window.globalStore);
+        app.config.globalProperties.$store = window.$__store;  
+        app.provide('store', window.$__store);
 
         // create global Pinia bridge store
-        if (!window.bridgeStore) {
-            const bridgeStore = createGlobalPiniaStoreFromVuex(pinia, piniaInstance, window.globalStore);
+        if (!piniaInstance.$__bridgeStore) {
+            const $__bridgeStore = createGlobalPiniaStoreFromVuex(pinia, piniaInstance, window.$__store);
 
-            window.bridgeStore = bridgeStore;
+            piniaInstance.$__bridgeStore = $__bridgeStore;
             console.debug('[PLUGIN][Vuex<->Pinia] Created Pinia bridge store for Vuex root');
         } else {
             console.debug('[PLUGIN][Vuex<->Pinia] Pinia bridge store already installed');
         }
-        app.config.globalProperties.$bridgeStore = window.bridgeStore;
-        app.provide('bridgeStore', window.bridgeStore);
+        app.config.globalProperties.$bridgeStore = piniaInstance.$__bridgeStore;
+        app.provide('bridgeStore', piniaInstance.$__bridgeStore);
 
         // create derived Pinia stores for each Vuex module
-        const namespaces = Object.keys(window.store._modulesNamespaceMap)
+        const namespaces = Object.keys(window.$__store._modulesNamespaceMap)
             .map((ns) => ns.replace(/\/$/, ""));
         if (namespaces.length > 0) {
-            if (window.derivedStore && window.derivedStore.disposeBridge && typeof window.derivedStore.disposeBridge === 'function') {
+            if (piniaInstance.$__derivedStore 
+                && piniaInstance.$__derivedStore.disposeBridge 
+                && typeof piniaInstance.$__derivedStore.disposeBridge === 'function') {
                 console.debug('[PLUGIN][Vuex<->Pinia] Disposing existing derivedStore bridges');
-                window.derivedStore.disposeBridge();
+                piniaInstance.$__derivedStore.disposeBridge();
             }
 
-            /** @type {Record<string, import("pinia").Store<any, any>>} */
+            /** @type {Record<string, import("pinia").Store<any, any>> & { disposeBridge: () => void }} */
             const derivedStore = {};
             for (const namespace of namespaces) {
-                console.log(`[PLUGIN][Vuex<->Pinia] Created Pinia bridge store for module: ${namespace}`)
+                console.log(`[PLUGIN][Vuex<->Pinia] Created Pinia bridge store for module: derivedStore.${namespace}`)
 
                 const opts = (options && options[namespace]) ?? {};
-                const store = createPiniaStoreFromVuex(pinia, piniaInstance, window.globalStore, namespace, opts);
+                const store = createPiniaStoreFromVuex(pinia, piniaInstance, window.$__store, namespace, opts);
                 derivedStore[namespace] = store;
-                app.provide(`$.derivedStore.${namespace}`, store);;
+                app.provide(`derivedStore.${namespace}`, store);;
             }
 
             derivedStore.disposeBridge = () => {
@@ -111,12 +108,47 @@ export const usePiniaStore = window.usePiniaStore = (pinia, piniaInstance) => ({
                 }
             };
 
-            window.derivedStore = derivedStore
+            piniaInstance.$__derivedStore = derivedStore
             console.debug('[PLUGIN][Vuex<->Pinia] Created derived Pinia stores for Vuex modules:', Object.keys(derivedStore));
         } else {
             console.info('[PLUGIN][Vuex<->Pinia] No vuex modules found for bridging');
         }
-        app.config.globalProperties.$derivedStore = window.derivedStore;
-        app.provide('derivedStore', window.derivedStore);
+        app.config.globalProperties.$derivedStore = piniaInstance.$__derivedStore;
+        app.provide('derivedStore', piniaInstance.$__derivedStore);
     }
-})
+});
+
+export const useTransferablePlugin = window.$__useTransferablePlugin = ({
+    version: 'vue-3',
+    type: 'vue-3',
+    name: 'TransferablePlugin-Vue-3',
+
+    /**
+     * @param {any} app 
+     * @param {{ [key: string]: Record<string, any> }} options 
+     */
+    install(app, options) {
+        const includes = options && options.includes ? options.includes : [];
+        const excludes = options && options.excludes ? options.excludes : [];
+        (window.$__pluginRegistry || []).filter(item => {
+            const plugin = item.plugin;
+            if (includes.length > 0 || excludes.length > 0) {
+                if (!includes.includes(plugin.name)) {
+                    return false;
+                }
+                if (excludes.includes(plugin.name)) {
+                    return false;
+                }
+            } else if (plugin.type !== 'global') {
+                return false;
+            }
+            return true;
+        })
+            .forEach(pluginInstall => {
+                console.log(`[TransferablePlugin] Installing plugin: ${pluginInstall.plugin.name}`);
+                const plugin = pluginInstall.plugin;
+                const args = plugin.args || [];
+                app.use(plugin.install, ...args);
+            });
+    }
+});

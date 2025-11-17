@@ -16,7 +16,8 @@ import {
   registerBridges, 
   useDerivedStore, 
   usePiniaStore, 
-  useVuexStore 
+  useVuexStore,
+  useTransferablePlugin,
 } from "./stores";
 import {
   bus,
@@ -54,7 +55,8 @@ export {
   usePiniaStore,
   useVuexStore,
   bus,
-  mfeEventBus
+  mfeEventBus,
+  useTransferablePlugin,
 };
 
 export default {
@@ -72,5 +74,6 @@ export default {
   usePiniaStore,
   useVuexStore,
   bus,
-  mfeEventBus
+  mfeEventBus,
+  useTransferablePlugin,
 };

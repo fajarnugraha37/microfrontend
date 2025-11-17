@@ -76,6 +76,17 @@ export class MicrofrontBus {
 
 export const bus: MicrofrontBus;
 export const mfeEventBus: MfeEventBus;
+
+// compat
+export const useTransferablePlugin: {
+    version: string;
+    type: string;
+    name: string;
+    install(app: any, options: {
+        [key: string]: Record<string, any>;
+    }): void;
+}
+
 declare const _default: {
   install(Vue: typeof import('vue')): void;
   CButton: typeof CButton;
@@ -102,24 +113,34 @@ declare global {
     VueRouter: typeof import("vue-router").default;
     Pinia: typeof import("pinia");
 
-    store: import("vuex").Store<any>;
-    globalStore: import("vuex").Store<any>;
-    bridgeStore: import("pinia").Store<string, any>;
-    derivedStore: Record<string, import("pinia").Store<any>>;
-    bus?: MicrofrontBus;
-    mfeEventBus?: MfeEventBus;
+    $__store: import("vuex").Store<any>;
+    $__useVuexStore:typeof useVuexStore;
+    $__useDerivedStore: typeof useDerivedStore;
+    $__usePiniaStore: typeof usePiniaStore;
+    $__useBridgeStore: typeof useBridgeStore;
+    $__registerBridges: typeof registerBridges;
+    $__bridgeReplaceState: typeof bridgeReplaceState;
 
-    useVuexStore:typeof useVuexStore;
-    useDerivedStore: typeof useDerivedStore;
-    usePiniaStore: typeof usePiniaStore;
-    useBridgeStore: typeof useBridgeStore;
+    $__bus?: MicrofrontBus;
+    $__mfeEventBus?: MfeEventBus;
+    
+    $__useTransferablePlugin: typeof useTransferablePlugin;
+    $__pluginRegistry: Function[];
+    $__mixinRegistry: Function[];
+    $__directiveRegistry: Function[];
+    $__filterRegistry: Function[];
 
     __POWERED_BY_QIANKUN__?: boolean;
-    
-    _pluginRegistry: Function[];
-    _mixinRegistry: Function[];
-    _directiveRegistry: Function[];
-    _filterRegistry: Function[];
+  }
+}
+
+declare module 'pinia' {
+  interface Pinia {
+    $__bridgeStore: (import('pinia').Store<any, any>) & { disposeBridge: () => void }
+    $__derivedStore:(
+      Record<string, (import('pinia').Store<any, any> & ({ disposeBridge: () => void }))> 
+      & ({ disposeBridge: () => void })
+    );
   }
 }
 
@@ -127,7 +148,7 @@ export = _;
 export as namespace _;
 
 declare const _: _.LoDashStatic;
-declare namespace _ {
+declare module 'lodash' {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface -- (This will be augmented)
   interface LoDashStatic {
     diff(s: any, state: Record<string, any>): unknown;

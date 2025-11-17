@@ -8,7 +8,7 @@ import { createVuexModulePiniaBridge } from "./createVuexModulePiniaBridge";
  * @param {{ store: () => import('pinia').Store; namespace: string }[]} modules
  */
 // @ts-ignore
-export function registerBridges(vuex, pinia, modules = []) {
+export const registerBridges = window.$__registerBridges = (vuex, pinia, modules = []) => {
     /**
      * @type {(() => void)[]}
      */
@@ -35,7 +35,7 @@ export function registerBridges(vuex, pinia, modules = []) {
  * @param {Record<string, any>} state 
  * @param {Record<string, any>} newRoot 
  */
-export const bridgeReplaceState = function (namespace, state, newRoot) {
+export const bridgeReplaceState = window.$__bridgeReplaceState = function (namespace, state, newRoot) {
     deepPatch(state, newRoot);
     console.debug(`[Pinia->Vuex] committed ${namespace}/BRIDGE_REPLACE_STATE`);
 }

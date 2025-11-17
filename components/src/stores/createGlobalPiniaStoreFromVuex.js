@@ -17,7 +17,7 @@ import { createVuexRootPiniaBridge } from './createVuexRootPiniaBridge';
  * @param {object} [options]
  * @param {string} [options.id] - pinia id (default: 'global')
  * @param {(rootState: Record<string, any>) => any} [options.mapState] - optional mapper: vuexRoot -> piniaRoot
- * @returns {() => import('pinia').Store} pinia useStore fn
+ * @returns {(() => import('pinia').Store) & { disposeBridge: () => void }} pinia useStore fn
  */
 export function createGlobalPiniaStoreFromVuex(pinia, piniaInstance, vuex, options = {}) {
     const id = options.id || "global";
