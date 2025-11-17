@@ -14,9 +14,6 @@ importers:
       core-js:
         specifier: ^3.8.3
         version: 3.46.0
-      mfe-components:
-        specifier: file:../components
-        version: file:../components(vue@3.5.24)
       pinia:
         specifier: ^3.0.4
         version: 3.0.4(vue@3.5.24)
@@ -60,6 +57,9 @@ importers:
       eslint-plugin-vue:
         specifier: ^6.2.2
         version: 6.2.2(eslint@6.8.0)
+      mfe-components:
+        specifier: file:../components
+        version: file:../components(vue@3.5.24)
       terser:
         specifier: 5.4.0
         version: 5.4.0
@@ -748,14 +748,14 @@ packages:
   '@vue/devtools-api@6.6.4':
     resolution: {integrity: sha512-sGhTPMuXqZ1rVOk32RylztWkfXTRhuS7vgAKv0zjqk8gbsHkJ7xfFf+jbySxt7tWObEJwyKaHMikV/WGDiQm8g==}
 
-  '@vue/devtools-api@7.7.8':
-    resolution: {integrity: sha512-BtFcAmDbtXGwurWUFf8ogIbgZyR+rcVES1TSNEI8Em80fD8Anu+qTRN1Fc3J6vdRHlVM3fzPV1qIo+B4AiqGzw==}
+  '@vue/devtools-api@7.7.9':
+    resolution: {integrity: sha512-kIE8wvwlcZ6TJTbNeU2HQNtaxLx3a84aotTITUuL/4bzfPxzajGBOoqjMhwZJ8L9qFYDU/lAYMEEm11dnZOD6g==}
 
-  '@vue/devtools-kit@7.7.8':
-    resolution: {integrity: sha512-4Y8op+AoxOJhB9fpcEF6d5vcJXWKgHxC3B0ytUB8zz15KbP9g9WgVzral05xluxi2fOeAy6t140rdQ943GcLRQ==}
+  '@vue/devtools-kit@7.7.9':
+    resolution: {integrity: sha512-PyQ6odHSgiDVd4hnTP+aDk2X4gl2HmLDfiyEnn3/oV+ckFDuswRs4IbBT7vacMuGdwY/XemxBoh302ctbsptuA==}
 
-  '@vue/devtools-shared@7.7.8':
-    resolution: {integrity: sha512-XHpO3jC5nOgYr40M9p8Z4mmKfTvUxKyRcUnpBAYg11pE78eaRFBKb0kG5yKLroMuJeeNH9LWmKp2zMU5LUc7CA==}
+  '@vue/devtools-shared@7.7.9':
+    resolution: {integrity: sha512-iWAb0v2WYf0QWmxCGy0seZNDPdO3Sp5+u78ORnyeonS6MT4PC7VPrryX2BpMJrwlDeaZ6BD4vP4XKjK0SZqaeA==}
 
   '@vue/reactivity@3.5.24':
     resolution: {integrity: sha512-BM8kBhtlkkbnyl4q+HiF5R5BL0ycDPfihowulm02q3WYp2vxgPcJuZO866qa/0u3idbMntKEtVNuAUp5bw4teg==}
@@ -851,8 +851,8 @@ packages:
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
 
-  baseline-browser-mapping@2.8.28:
-    resolution: {integrity: sha512-gYjt7OIqdM0PcttNYP2aVrr2G0bMALkBaoehD4BuRGjAOtipg0b6wHg1yNL+s5zSnLZZrGHOw4IrND8CD+3oIQ==}
+  baseline-browser-mapping@2.8.29:
+    resolution: {integrity: sha512-sXdt2elaVnhpDNRDz+1BDx1JQoJRuNk7oVlAlbGiFkLikHCAQiccexF/9e91zVi6RCgqspl04aP+6Cnl9zRLrA==}
     hasBin: true
 
   birpc@2.8.0:
@@ -948,8 +948,8 @@ packages:
     resolution: {integrity: sha512-u/O3vwbptzhMs3L1fQE82ZSLHQQfto5gyZzwteVIEyeaY5Fc7R4dapF/BvRoSYFeqfBk4m0V1Vafq5Pjv25wvA==}
     engines: {node: '>= 6'}
 
-  csstype@3.2.2:
-    resolution: {integrity: sha512-D80T+tiqkd/8B0xNlbstWDG4x6aqVfO52+OlSUNIdkTvmNw0uQpJLeos2J/2XvpyidAFuTPmpad+tUxLndwj6g==}
+  csstype@3.2.3:
+    resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
 
   debug@4.4.3:
     resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
@@ -2454,13 +2454,13 @@ snapshots:
 
   '@vue/devtools-api@6.6.4': {}
 
-  '@vue/devtools-api@7.7.8':
+  '@vue/devtools-api@7.7.9':
     dependencies:
-      '@vue/devtools-kit': 7.7.8
+      '@vue/devtools-kit': 7.7.9
 
-  '@vue/devtools-kit@7.7.8':
+  '@vue/devtools-kit@7.7.9':
     dependencies:
-      '@vue/devtools-shared': 7.7.8
+      '@vue/devtools-shared': 7.7.9
       birpc: 2.8.0
       hookable: 5.5.3
       mitt: 3.0.1
@@ -2468,7 +2468,7 @@ snapshots:
       speakingurl: 14.0.1
       superjson: 2.2.5
 
-  '@vue/devtools-shared@7.7.8':
+  '@vue/devtools-shared@7.7.9':
     dependencies:
       rfdc: 1.4.1
 
@@ -2486,7 +2486,7 @@ snapshots:
       '@vue/reactivity': 3.5.24
       '@vue/runtime-core': 3.5.24
       '@vue/shared': 3.5.24
-      csstype: 3.2.2
+      csstype: 3.2.3
 
   '@vue/server-renderer@3.5.24(vue@3.5.24)':
     dependencies:
@@ -2577,7 +2577,7 @@ snapshots:
 
   balanced-match@1.0.2: {}
 
-  baseline-browser-mapping@2.8.28: {}
+  baseline-browser-mapping@2.8.29: {}
 
   birpc@2.8.0: {}
 
@@ -2590,7 +2590,7 @@ snapshots:
 
   browserslist@4.28.0:
     dependencies:
-      baseline-browser-mapping: 2.8.28
+      baseline-browser-mapping: 2.8.29
       caniuse-lite: 1.0.30001755
       electron-to-chromium: 1.5.254
       node-releases: 2.0.27
@@ -2686,7 +2686,7 @@ snapshots:
 
   css-what@6.2.2: {}
 
-  csstype@3.2.2: {}
+  csstype@3.2.3: {}
 
   debug@4.4.3:
     dependencies:
@@ -3089,7 +3089,7 @@ snapshots:
 
   pinia@3.0.4(vue@3.5.24):
     dependencies:
-      '@vue/devtools-api': 7.7.8
+      '@vue/devtools-api': 7.7.9
       vue: 3.5.24
 
   postcss@8.5.6:

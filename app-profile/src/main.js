@@ -12,28 +12,31 @@ import * as pinia from 'pinia';
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import App from './App.vue';
 import router from './router';
-import { usePiniaStore } from 'mfe-components';
 
 /**
  * @type {import('vue').App}
  */
 let instance = null;
+/**
+ * @type {import('pinia').Pinia}
+ */
+let piniaInstance = null;
 function render(props = {}) {
   try {
     const {
       container,
       store: parentStore,
-      globalStore,
     } = props;
 
     // store.attachModule(parentStore);
-    // store.attachModule(globalStore);
-    const piniaInstance = createPinia();
-    piniaInstance.use(piniaPluginPersistedstate);
+    if (piniaInstance == null) {
+      piniaInstance = createPinia();
+      piniaInstance.use(piniaPluginPersistedstate);
+    }
+
     const app = createApp(App, {
       props: {
         store: parentStore,
-        globalStore: globalStore,
       },
       mounted() {
         console.info('[app-profile] mounted hook in App.vue');
@@ -41,28 +44,18 @@ function render(props = {}) {
     });
 
     app.use(piniaInstance);
-    app.use(usePiniaStore(pinia, piniaInstance), {
+    app.use(router);
+    app.use(window.$__usePiniaStore(pinia, piniaInstance), {
       'config': {},
     });
-    app.use({
-      install(appInstance, options) {
-        console.info('[app-profile] install plugin with options', options);
-      }
-    })
-    app.use(router);
-    for (const pluginInstall of window._pluginRegistry.filter(item => item.plugin.type == 'global')) {
-      const plugin = pluginInstall.plugin;
-      const args = plugin.args || [];
-      console.info(`[app-profile] installed global plugin ${plugin.name}@${plugin.version}`, plugin, args);
-      app.use(plugin.install, ...args);
-    }
+    app.use(window.$__useTransferablePlugin);
     app.mixin({
       methods: {
         myGlobalMethod(msg) {
           console.log("[global]", msg);
         },
       },
-  });
+    });
     app.mount(container ? container.querySelector('#app') : '#app');
     instance = app;
   } catch (error) {
@@ -91,6 +84,11 @@ export async function unmount() {
     instance.unmount();
     instance._container.innerHTML = '';
     instance = null;
+  }
+  if (piniaInstance) {
+    piniaInstance?.$__bridgeStore?.disposeBridge();
+    piniaInstance?.$__derivedStore?.disposeBridge();
+    piniaInstance = null;
   }
 }
 
