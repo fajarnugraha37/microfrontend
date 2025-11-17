@@ -6,6 +6,9 @@ if (window.__POWERED_BY_QIANKUN__) {
   window.__webpack_public_path__ = window.__INJECTED_PUBLIC_PATH_BY_QIANKUN__;
 }
 
+import * as veeValidate from 'vee-validate';
+import { all } from '@vee-validate/rules';
+import { localize } from '@vee-validate/i18n';
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import * as pinia from 'pinia';
@@ -48,7 +51,13 @@ function render(props = {}) {
     app.use(window.$__usePiniaStore(pinia, piniaInstance), {
       'config': {},
     });
-    app.use(window.$__useTransferablePlugin);
+    app.use(window.$__useTransferablePlugin, {
+      piniaInstance: piniaInstance,
+      router: router,
+      veeValidate: veeValidate,
+      rules: all,
+      localize: localize,
+    });
     app.mixin({
       methods: {
         myGlobalMethod(msg) {

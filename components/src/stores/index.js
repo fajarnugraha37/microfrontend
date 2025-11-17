@@ -128,6 +128,8 @@ export const useTransferablePlugin = window.$__useTransferablePlugin = ({
      * @param {{ [key: string]: Record<string, any> }} options 
      */
     install(app, options) {
+        options = options || {};
+        console.log('[TransferablePlugin] Installing transferable plugins with options:', options);
         const includes = options && options.includes ? options.includes : [];
         const excludes = options && options.excludes ? options.excludes : [];
         (window.$__pluginRegistry || []).filter(item => {
@@ -148,6 +150,12 @@ export const useTransferablePlugin = window.$__useTransferablePlugin = ({
                 console.log(`[TransferablePlugin] Installing plugin: ${pluginInstall.plugin.name}`);
                 const plugin = pluginInstall.plugin;
                 const args = plugin.args || [];
+                // merge the first arg if it's an object with options
+                if (args.length > 0 && typeof args[0] === 'object' && !Array.isArray(args[0])) {
+                    args[0] = { ...options, ...args[0] };
+                } else if (args.length === 0) {
+                    args.push(options || {});
+                }
                 app.use(plugin.install, ...args);
             });
     }

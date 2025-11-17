@@ -6,7 +6,8 @@
     </p>
     <p v-else>
       Login from the shell to load profile data.
-    </p>
+    </p> 
+    <LoginForm />
     <section>
       <h4>Bio</h4>
       <p>{{ profile.bio }}</p>
@@ -18,19 +19,29 @@
           {{ interest }}
         </li>
       </ul>
-    <c-button>Notify Shell About Activity</c-button>
+    </section>
+    <hr />
+    <section>
+      <h4>Update Profile</h4>
+      <Questionnaire />
+    </section>
+    <hr />
+    <section>
+      <c-button>Notify Shell About Activity</c-button>
     </section>
   </article>
 </template>
 
 <script>
-import { useProfileStore } from '../store';
 import { CButton } from 'mfe-components';
+import { useProfileStore } from '../store';
+import Questionnaire from '../components/Questionnaire.vue';
 
 export default {
   name: 'ProfileOverview',
   components: {
-    CButton
+    CButton,
+    Questionnaire,
   },
   props: {
     sharedShell: {
@@ -53,6 +64,11 @@ export default {
     profile() {
       return this.useProfileStore.profile;
     },
+  },
+  methods: {
+    onLoginSuccess(data) {
+      console.log('Login successful:', data);
+    }
   }
 };
 </script>

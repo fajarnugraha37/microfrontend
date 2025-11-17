@@ -5,7 +5,10 @@ export const useProfileStore = defineStore("profile", () => {
   // State
   const profile = ref({
     bio: 'Front-end engineer passionate about microfrontends.',
-    interests: ['Vue.js', 'Qiankun', 'Design Systems']
+    interests: ['Vue.js', 'Qiankun', 'Design Systems'],
+    nric: '',
+    fin: '',
+    uen: ''
   });
 
   const sharedShell = ref({});
@@ -19,9 +22,24 @@ export const useProfileStore = defineStore("profile", () => {
     profile.value.interests = interests;
   };
 
+  const updateNric = (nric) => {
+    profile.value.nric = nric;
+  };
+
+  const updateFin = (fin) => {
+    profile.value.fin = fin;
+  };
+
+  const updateUen = (uen) => {
+    profile.value.uen = uen;
+  };
+
   const saveProfile = (payload) => {
     updateBio(payload.bio);
     updateInterests(payload.interests);
+    if (payload.nric !== undefined) updateNric(payload.nric);
+    if (payload.fin !== undefined) updateFin(payload.fin);
+    if (payload.uen !== undefined) updateUen(payload.uen);
   };
 
   const replaceSharedShell = (payload) => {
@@ -42,6 +60,9 @@ export const useProfileStore = defineStore("profile", () => {
     sharedShell,
     updateBio,
     updateInterests,
+    updateNric,
+    updateFin,
+    updateUen,
     saveProfile,
     replaceSharedShell,
     setSharedShell,
