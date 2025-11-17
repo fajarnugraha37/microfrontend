@@ -58,7 +58,7 @@
         <label class="form-label">Agree to Terms</label>
         <div>
           <label class="terms">
-            <Field name="terms" type="checkbox" rules="required" />
+            <Field name="terms" type="checkbox" :value="true" rules="required" label="Terms" />
             I agree to the terms of this app.
           </label>
           <ErrorMessage name="terms" class="form-error" />
@@ -76,7 +76,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Form, Field, ErrorMessage, defineRule } from 'vee-validate';
 import { required, email, min, max } from '@vee-validate/rules';
 import { useProfileStore } from '@/store';
@@ -86,6 +86,20 @@ defineRule('required', required);
 defineRule('email', email);
 defineRule('min', min);
 defineRule('max', max);
+
+// Improve validation messages and avoid non-descriptive defaults
+// configure({
+//   generateMessage: (ctx) => {
+//     const fieldName = typeof ctx.field === 'string' ? ctx.field : (ctx.field?.name || 'Field');
+//     const rule = ctx.rule?.name;
+//     const params = ctx.rule?.params || [];
+//     if (rule === 'required') return `${fieldName} is required`;
+//     if (rule === 'email') return `${fieldName} must be a valid email address`;
+//     if (rule === 'min') return `${fieldName} must be at least ${params[0] || ''} characters`;
+//     if (rule === 'max') return `${fieldName} must be less than or equal to ${params[0] || ''} characters`;
+//     return `${fieldName} is not valid`;
+//   },
+// });
 
 // Local rules for NRIC/FIN/UEN — if they are already registered globally this is harmless
 // defineRule('nric', (value) => {
@@ -114,14 +128,14 @@ const customInterest = ref('');
 const successMessage = ref('');
 
 const initialValues = computed(() => ({
-  name: '',
-  email: '',
+  name: profileStore.profile?.name || '',
+  email: profileStore.profile?.email || '',
   bio: profileStore.profile?.bio || '',
   nric: profileStore.profile?.nric || '',
   fin: profileStore.profile?.fin || '',
   uen: profileStore.profile?.uen || '',
   interests: profileStore.profile?.interests || [],
-  terms: false,
+  terms: !!profileStore.profile?.terms,
 }));
 
 const onSubmit = (values, { resetForm }) => {
@@ -132,6 +146,9 @@ const onSubmit = (values, { resetForm }) => {
     nric: values.nric,
     fin: values.fin,
     uen: values.uen,
+    name: values.name,
+    email: values.email,
+    terms: values.terms,
   });
   successMessage.value = 'Profile saved successfully!';
   setTimeout(() => (successMessage.value = ''), 3500);
@@ -140,14 +157,29 @@ const onSubmit = (values, { resetForm }) => {
 const addCustomInterest = () => {
   const trimmed = (customInterest.value || '').trim();
   if (trimmed && !interestOptions.value.includes(trimmed)) {
+    // Add to local options so it immediately appears
     interestOptions.value.push(trimmed);
-    // Also toggle the value by adding to the initial interests
+    // Also update the stored interests immutably so pinia change detection persists it
     const currentInterests = profileStore.profile?.interests || [];
-    currentInterests.push(trimmed);
-    profileStore.updateInterests(currentInterests);
+    profileStore.updateInterests([...currentInterests, trimmed]);
     customInterest.value = '';
   }
 };
+
+// Ensure the current stored interests are present in the options list (e.g. when returning to the page)
+watch(
+  () => profileStore.profile?.interests,
+  (newInterests) => {
+    if (Array.isArray(newInterests)) {
+      newInterests.forEach((i) => {
+        if (i && !interestOptions.value.includes(i)) {
+          interestOptions.value.push(i);
+        }
+      });
+    }
+  },
+  { immediate: true }
+);
 
 const onReset = (evt) => {
   // Reset to store values

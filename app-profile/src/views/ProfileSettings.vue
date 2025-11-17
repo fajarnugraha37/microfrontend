@@ -1,17 +1,7 @@
 <template>
   <article class="profile-settings">
     <h3>Profile Settings</h3>
-    <form @submit.prevent="save">
-      <label>
-        <span>Bio</span>
-        <textarea v-model="form.bio" rows="3"></textarea>
-      </label>
-      <label>
-        <span>Interests (comma separated)</span>
-        <input v-model="form.interests" type="text">
-      </label>
-      <c-button type="submit">Save Profile</c-button>
-    </form>
+    <Questionnaire />
     <p v-if="savedAt" class="profile-settings__status">
       Saved at {{ formatted(savedAt) }}
     </p>
@@ -21,11 +11,13 @@
 <script>
 import { CButton } from 'mfe-components';
 import { useProfileStore } from '../store';
+import Questionnaire from '../components/Questionnaire.vue';
 
 export default {
   name: 'ProfileSettings',
   components: {
-    CButton
+    CButton,
+    Questionnaire
   },
   props: {
     sharedShell: {

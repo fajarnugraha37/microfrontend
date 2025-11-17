@@ -8,7 +8,11 @@ export const useProfileStore = defineStore("profile", () => {
     interests: ['Vue.js', 'Qiankun', 'Design Systems'],
     nric: '',
     fin: '',
-    uen: ''
+    uen: '',
+    // Add name/email/terms so they persist and can be used as pre-populated fields
+    name: '',
+    email: '',
+    terms: false
   });
 
   const sharedShell = ref({});
@@ -20,6 +24,18 @@ export const useProfileStore = defineStore("profile", () => {
 
   const updateInterests = (interests) => {
     profile.value.interests = interests;
+  };
+
+  const updateName = (name) => {
+    profile.value.name = name;
+  };
+
+  const updateEmail = (email) => {
+    profile.value.email = email;
+  };
+
+  const updateTerms = (terms) => {
+    profile.value.terms = !!terms;
   };
 
   const updateNric = (nric) => {
@@ -35,11 +51,14 @@ export const useProfileStore = defineStore("profile", () => {
   };
 
   const saveProfile = (payload) => {
-    updateBio(payload.bio);
-    updateInterests(payload.interests);
+    if (payload.bio !== undefined) updateBio(payload.bio);
+    if (payload.interests !== undefined) updateInterests(payload.interests);
     if (payload.nric !== undefined) updateNric(payload.nric);
     if (payload.fin !== undefined) updateFin(payload.fin);
     if (payload.uen !== undefined) updateUen(payload.uen);
+    if (payload.name !== undefined) updateName(payload.name);
+    if (payload.email !== undefined) updateEmail(payload.email);
+    if (payload.terms !== undefined) updateTerms(payload.terms);
   };
 
   const replaceSharedShell = (payload) => {
@@ -63,6 +82,9 @@ export const useProfileStore = defineStore("profile", () => {
     updateNric,
     updateFin,
     updateUen,
+    updateName,
+    updateEmail,
+    updateTerms,
     saveProfile,
     replaceSharedShell,
     setSharedShell,
