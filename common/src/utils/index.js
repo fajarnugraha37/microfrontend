@@ -4,7 +4,7 @@ export * from "./obj";
 
 import loadConfig from "./configLoader";
 import formatPrice from "./formatPrice";
-import obj from "./obj";
+import * as obj from "./obj";
 
 export const utils = {
   formatDate: (value) => {
