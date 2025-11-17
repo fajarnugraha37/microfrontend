@@ -3,7 +3,7 @@
     <header class="profile-app__header">
       <h2>Profile Microfrontend</h2>
       <div class="profile-app__user" v-if="isAuthenticated">
-        Viewing profile for <strong>{{ username }} from username</strong>
+        Viewing profile for <strong>{{ useBridgeStore.user.name }} from username</strong>
         <br />
         <h3>
           Global Counter: {{ useBridgeStore.counter }}
