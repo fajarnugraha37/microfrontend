@@ -3,7 +3,7 @@ import ProfileOverview from '../views/ProfileOverview.vue';
 import ProfileActivity from '../views/ProfileActivity.vue';
 import ProfileSettings from '../views/ProfileSettings.vue';
 
-const base = window.__POWERED_BY_QIANKUN__ ? '/profile' : '/';
+const base = '/profile';
 
 const router = new createRouter({
   history: createWebHistory(base),

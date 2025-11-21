@@ -24,7 +24,6 @@
     </header>
     <main class="layout__main">
       <router-view />
-      <section id="micro-app-container" class="micro-host" />
     </main>
   </div>
 </template>

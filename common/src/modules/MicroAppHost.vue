@@ -18,7 +18,7 @@
         <span class="micro-app-info-value">Ready to render remote app</span>
       </div>
     </div>
-    <slot />
+    <section id="micro-app-container" class="micro-host" />
   </section>
 </template>
 
@@ -34,7 +34,7 @@ export default {
   border-radius: 14px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10);
   padding: 2rem 2rem 1.5rem 2rem;
-  max-width: 900px;
+  max-width: 1200px;
   margin: 2rem auto;
   display: flex;
   flex-direction: column;

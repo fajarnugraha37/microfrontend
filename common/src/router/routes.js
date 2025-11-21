@@ -2,10 +2,11 @@ import Home from '../views/Home.vue';
 import Login from '../views/Login.vue';
 import Users from '../views/Users.vue';
 import ProductView from '../views/ProductView.vue';
-import MicroAppHost from '../modules/MicroAppHost.vue';
+import { qiankunApps } from '../use-qiankn';
+import { mfApps } from '../use-mf'; 
 
 /** @type {import('vue-router').RouteConfig[]} */
-export const routes = [
+const routes = [
   {
     path: '/',
     name: 'home',
@@ -32,28 +33,10 @@ export const routes = [
     name: 'product-detail',
     component: ProductView
   },
-  {
-    path: '/dashboard',
-    name: 'dashboard-root',
-    component: MicroAppHost,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/dashboard/:path*',
-    name: 'dashboard-mfe',
-    component: MicroAppHost,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/profile',
-    name: 'profile-root',
-    component: MicroAppHost,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/profile/:path*',
-    name: 'profile-mfe',
-    component: MicroAppHost,
-    meta: { requiresAuth: true }
-  }
+  ...qiankunApps.map(app => app.routes).flat(),
+  ...mfApps.map(app => app.routes).flat(),
 ];
+
+export {
+  routes
+}

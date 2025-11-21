@@ -5,16 +5,13 @@ import "./compat";
 import "mfe-components";
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap/dist/js/bootstrap.js";
-import Vue from 'vue';
 
+import { useVuexStore } from 'mfe-components';
 import { useRouter } from './router';
 import { useUtilities } from './utils';
 import { useValidators } from './validators';
 import { useMixins } from './mixins';
-
 import App from './App.vue';
-import { useQiankun as useMFEs } from './use-qiankn';
-import { useVuexStore } from 'mfe-components';
 import { globalStore } from './store';
 
 window.Vue.config.productionTip = false;
@@ -32,15 +29,13 @@ useValidators(window.Vue);
 useVuexStore(window.Vue, globalStore);
 useRouter(window.Vue);
 
-const app = (() => {
-  return new window.Vue({
-    router: window.router,
-    store: window.$__store,
-    render: (h) => h(App)
-  }).$mount('#app');
-})();
+const app = new window.Vue({
+  router: window.router,
+  store: window.$__store,
+  render: (h) => h(App)
+});
 
-useMFEs();
+app.$mount('#app');
 
 console.log('[main] Vue Computed', window.Vue.options.computed);
 console.log('[main] Vue Directives', window.Vue.options.directives);
@@ -56,7 +51,7 @@ console.log('[main] registered plugins: ', window.$__pluginRegistry);
 console.log('[main] registered mixins: ', window.$__mixinRegistry);
 console.log('[main] registered directives: ', window.$__directiveRegistry);
 console.log('[main] registered filters: ', window.$__filterRegistry);
-console.log('[main] registered custom property: ', Object.getOwnPropertyNames(Vue.prototype || {}).filter(
+console.log('[main] registered custom property: ', Object.getOwnPropertyNames(window.Vue.prototype || {}).filter(
   (k) => k.startsWith('$')));
 
 export default app;

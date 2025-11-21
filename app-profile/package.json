@@ -9,7 +9,6 @@
     "lint": "eslint --ext .js,.vue src"
   },
   "dependencies": {
-    "@module-federation/vite": "^1.9.1",
     "@vee-validate/i18n": "^4.15.1",
     "@vee-validate/rules": "^4.15.1",
     "@vue/compat": "^3.5.24",
@@ -25,6 +24,7 @@
   "devDependencies": {
     "@babel/core": "^7.28.5",
     "@babel/preset-env": "^7.28.4",
+    "@module-federation/vite": "^1.9.1",
     "@types/node": "^18.19.0",
     "@vitejs/plugin-legacy": "^4.1.1",
     "@vitejs/plugin-vue": "^4.5.0",

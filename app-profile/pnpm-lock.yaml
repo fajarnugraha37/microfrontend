@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@module-federation/vite':
-        specifier: ^1.9.1
-        version: 1.9.1(rollup@3.29.5)
       '@vee-validate/i18n':
         specifier: ^4.15.1
         version: 4.15.1
@@ -51,6 +48,9 @@ importers:
       '@babel/preset-env':
         specifier: ^7.28.4
         version: 7.28.5(@babel/core@7.28.5)
+      '@module-federation/vite':
+        specifier: ^1.9.1
+        version: 1.9.1(rollup@3.29.5)
       '@types/node':
         specifier: ^18.19.0
         version: 18.19.130

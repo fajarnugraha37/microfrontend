@@ -1,6 +1,5 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
-import { federation } from "@module-federation/vite";
 import qiankun from "vite-plugin-qiankun-lite";
 import path from "path";
 import pkg from "./package.json";
@@ -14,32 +13,25 @@ const config = {
   },
 };
 
-export default defineConfig(() => {
+export default defineConfig(({ command, mode, ssrBuild }) => {
+  console.log(
+    `vite config command: ${command}, mode: ${mode}, ssrBuild: ${ssrBuild}`
+  );
   return {
-    // Use absolute base so chunk asset URLs resolve to remote origin when consumed by a host (prevents host origin 8080 rewrites)
+    // base: "/",
     base: "http://localhost:8082/",
     plugins: [
       vue({
         template: {
           compilerOptions: {
-            compatConfig: { MODE: 2 },
+            compatConfig: {
+              MODE: 2,
+            },
           },
         },
       }),
       qiankun({
         name: pkg.name,
-      }),
-      federation({
-        name: pkg.name,
-        filename: "remoteEntry.js",
-        manifest: true,
-        dev: true,
-        exposes: {
-          "./entry": "./src/entry.js",
-        },
-        shared: [
-          "mfe-components"
-        ],
       }),
     ],
     resolve: {
@@ -54,29 +46,36 @@ export default defineConfig(() => {
     server: {
       port: 8082,
       host: "0.0.0.0",
-      headers: { "Access-Control-Allow-Origin": "*" },
+      origin: "http://localhost:8082",
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
     },
-    preview: { port: 8082, host: "0.0.0.0" },
+    preview: {
+      port: 8082,
+      host: "0.0.0.0",
+    },
     build: {
-      target: "esnext",
+      target: "chrome89",
       outDir: "dist",
       emptyOutDir: true,
+      // Enable CSS splitting so CSS belonging to each vendor chunk can be separated
       cssCodeSplit: true,
       rollupOptions: {
         input: path.resolve(__dirname, "index.html"),
         output: {
-          // manualChunks(id) {
-          //   const excludedPackages = ["mfe-components"];
-          //   const pakageName =
-          //     id.split("node_modules").pop()?.split("/")[1] || pkg.name;
-          //   if (excludedPackages.includes(pakageName)) {
-          //     return undefined;
-          //   }
-          //   if (pakageName === pkg.name) {
-          //     return `${pakageName}`;
-          //   }
-          //   return `vendor/${pakageName}`;
-          // },
+          manualChunks(id) {
+            const excludedPackages = ["mfe-components"];
+            const pakageName =
+              id.split("node_modules").pop()?.split("/")[1] || pkg.name;
+            if (excludedPackages.includes(pakageName)) {
+              return undefined;
+            }
+            if (pakageName === pkg.name) {
+              return `${pakageName}`;
+            }
+            return `vendor/${pakageName}`;
+          },
           entryFileNames: (chunk) =>
             chunk.name === "main" ? `js/${pkg.name}.js` : `js/[name].js`,
           chunkFileNames: `js/[name].js`,
