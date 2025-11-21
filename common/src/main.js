@@ -13,7 +13,7 @@ import { useValidators } from './validators';
 import { useMixins } from './mixins';
 
 import App from './App.vue';
-import { useQiankun } from './qiankun';
+import { useQiankun as useMFEs } from './use-qiankn';
 import { useVuexStore } from 'mfe-components';
 import { globalStore } from './store';
 
@@ -40,7 +40,7 @@ const app = (() => {
   }).$mount('#app');
 })();
 
-useQiankun();
+useMFEs();
 
 console.log('[main] Vue Computed', window.Vue.options.computed);
 console.log('[main] Vue Directives', window.Vue.options.directives);

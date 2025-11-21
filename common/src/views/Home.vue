@@ -15,7 +15,7 @@
       </div>
       <div class="feature-card">
         <h3>Microfrontend Integration</h3>
-        <p>Mount remote apps like Dashboard and Profile with Qiankun.</p>
+        <p>Mount remote apps like Dashboard and Profile with single-spa.</p>
       </div>
       <div class="feature-card">
         <h3>Shared UI & Utilities</h3>

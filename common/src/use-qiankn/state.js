@@ -40,7 +40,7 @@ const setShellStore = (shellStore) => {
   updateGlobalState({ shellStore: snapshot });
 };
 
-export default {
+export const globalActions = {
   onGlobalStateChange: actions.onGlobalStateChange,
   setGlobalState: mergedSetGlobalState,
   offGlobalStateChange: actions.offGlobalStateChange,

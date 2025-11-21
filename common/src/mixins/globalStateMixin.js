@@ -1,6 +1,6 @@
 // Unified mixin for auth, config, and global state integration
 import { mapGetters, mapState, mapActions, mapMutations } from 'vuex';
-import globalActions from '../state';
+import { globalActions } from '../use-qiankn';
 
 export default {
   computed: {
