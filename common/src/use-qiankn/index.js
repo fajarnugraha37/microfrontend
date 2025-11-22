@@ -10,23 +10,19 @@ export const qiankunApps = [
     {
         name: 'app-dashboard',
         entry: '//localhost:8081',
-        container: '#micro-app-container',
+        // container: '#micro-app-container',
+        container: '.micro-app-host-area',
         activeRule: '/dashboard',
         props: {
             getStore: () => window.$__store,
         },
         routes: [
             {
-                path: '/dashboard',
-                name: 'dashboard-root',
-                component: () => import("../modules/MicroAppHost.vue"),
-                meta: { requiresAuth: true },
-            },
-            {
                 path: '/dashboard/:path*',
                 name: 'dashboard-mfe',
-                component: () => import("../modules/MicroAppHost.vue"),
+                component: () => import("../modules/MicroApp.vue"),
                 meta: { requiresAuth: true },
+                props: { renderType: 'qiankun' },
             },
         ],
     },

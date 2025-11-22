@@ -8,16 +8,11 @@ export const mfApps = [
         entryModule: 'entry',                          // exposed module name
         routes: [
             {
-                path: '/profile',
-                name: 'profile-root',
-                component: () => import('../modules/MicroAppLoader.vue'),
-                meta: { requiresAuth: true },
-            },
-            {
                 path: '/profile/:path*',
                 name: 'profile-mfe',
-                component: () => import('../modules/MicroAppLoader.vue'),
+                component: () => import('../modules/MicroApp.vue'),
                 meta: { requiresAuth: true },
+                props: { renderType: 'module-federation' },
             },
         ],
     },

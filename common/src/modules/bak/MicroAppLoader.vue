@@ -21,10 +21,10 @@
     <div ref="containerRef"></div>
   </section>
 </template>
-
+``
 <script>
-import { useModuleFederation } from '../use-mf';
-import { mfApps } from '../use-mf';
+import { useModuleFederation } from '../../use-mf';
+import { mfApps } from '../../use-mf';
 
 export default {
   name: 'MicroAppLoader',
