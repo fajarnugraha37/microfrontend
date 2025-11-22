@@ -28,7 +28,6 @@ export const qiankunApps = [
     },
 ];
 
-
 qiankun();
 function qiankun() {
     if (window.qiankunStarted === true) {

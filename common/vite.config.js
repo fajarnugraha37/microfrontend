@@ -6,33 +6,51 @@ import pkg from "./package.json";
 
 export default defineConfig(({ command, mode, ssrBuild }) => {
     console.log("Vite command:", command, "mode:", mode, "ssrBuild:", ssrBuild);
+    process.env.NODE_ENV = mode || 'production';
+    process.env.VUE_APP_ENV = mode || 'production';
+    process.env.ENV_TARGET = 'web';
+    process.env.RUNTIME_TARGET = 'web';
     return ({
         plugins: [
             vue(),
         ],
         resolve: {
+            conditions: ['browser', 'module', 'default'],
             alias: {
                 "@": path.resolve(__dirname, "src"),
             },
         },
         define: {
-            "process.env.MF_MODE": JSON.stringify("true"),
             "process.env": "import.meta.env",
+            ENV_TARGET: JSON.stringify('web'),
+            RUNTIME_TARGET: JSON.stringify('web'),
         },
         server: {
             port: 8080,
             host: "0.0.0.0",
             origin: "http://localhost:8080",
-            headers: {
-                "Access-Control-Allow-Origin": "*",
-            },
+            // headers: {
+            //     "Access-Control-Allow-Origin": "*",
+            //     'Content-Security-Policy':
+            //         [
+            //             "default-src 'self'",
+            //             "script-src 'self'",                // ❌ no 'unsafe-inline', no 'unsafe-eval'
+            //             "style-src 'self' 'unsafe-inline'", // ✅ allow inline styles
+            //             "img-src 'self' data:",
+            //             "connect-src 'self' ws: wss: http://localhost:*",
+            //             "object-src 'none'",
+            //             "base-uri 'self'",
+            //             "frame-ancestors 'self'",
+            //         ].join('; '),
+            // },
         },
         preview: {
             port: 8080,
             host: "0.0.0.0",
         },
         build: {
-            target: "chrome89",
+            ssr: false,            // make it clear: NO node/ssr build
+            target: 'esnext',      // or a modern browser target
             outDir: "dist",
             emptyOutDir: true,
             cssCodeSplit: true,

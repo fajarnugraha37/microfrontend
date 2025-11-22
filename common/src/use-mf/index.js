@@ -61,13 +61,6 @@ export const mfShared = {
             singleton: true,
         },
     },
-    "qiankun": {
-        lib: () => import('qiankun'),
-        scope: "default",
-        shareConfig: {
-            singleton: true,
-        },
-    },
 };
 
 /**
