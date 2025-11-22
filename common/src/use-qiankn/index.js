@@ -33,8 +33,8 @@ export const qiankunApps = [
 ];
 
 
-useQiankun();
-function useQiankun() {
+qiankun();
+function qiankun() {
     if (window.qiankunStarted === true) {
         console.warn('[qiankun] already started, skipping initialization.');
         return;

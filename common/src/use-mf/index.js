@@ -3,7 +3,8 @@ import { createInstance } from '@module-federation/runtime';
 export const mfApps = [
     {
         module: 'app-profile',                           // 👈 MUST exist
-        entry: 'http://localhost:8082/remoteEntry.js',
+        // entry: 'http://localhost:8082/remoteEntry.js',
+        entry: 'http://localhost:8082/mf-manifest.json',
         entryModule: 'entry',                          // exposed module name
         routes: [
             {
@@ -22,25 +23,81 @@ export const mfApps = [
     },
 ];
 
+export const mfShared = {
+    "vue": {
+        lib: () => import('vue'),
+        scope: "default",
+        shareConfig: {
+            singleton: true,
+        },
+    },
+    "vuex": {
+        lib: () => import('vuex'),
+        scope: "default",
+        shareConfig: {
+            singleton: true,
+        },
+    },
+    "vuex-persistedstate": {
+        lib: () => import('vuex-persistedstate'),
+        scope: "default",
+        shareConfig: {
+            singleton: true,
+        },
+    },
+    "vue-router": {
+        lib: () => import('vue-router'),
+        scope: "default",
+        shareConfig: {
+            singleton: true,
+        },
+    },
+    "vee-validate": {
+        lib: () => import('vee-validate'),
+        scope: "default",
+        shareConfig: {
+            singleton: true,
+        },
+    },
+    "mfe-components": {
+        lib: () => import('mfe-components'),
+        scope: "default",
+        shareConfig: {
+            singleton: true,
+        },
+    },
+    "qiankun": {
+        lib: () => import('qiankun'),
+        scope: "default",
+        shareConfig: {
+            singleton: true,
+        },
+    },
+};
+
 /**
  * Initialize module federation runtime with all remotes from mfApps.
  * Call this ONCE at app bootstrap (e.g. in main.js).
  */
-const remotes = mfApps.map((app) => ({
-    name: app.module,
-    entry: app.entry,
-    type: 'module', // Vite remotes are ESM modules :contentReference[oaicite:0]{index=0}
-}));
+const instance = (() => {
+    const remotes = mfApps.map((app) => ({
+        name: app.module,
+        entry: app.entry,
+        type: 'module', // Vite remotes are ESM modules :contentReference[oaicite:0]{index=0}
+    }));
+    if (process.env.NODE_ENV !== 'production') {
+        console.info('[mf] runtime initialized with remotes:', remotes);
+    }
 
-const instance = createInstance({
-    name: 'host',
-    remotes,
-});
+    const _instance = createInstance({
+        id: 'host',
+        name: 'host',
+        remotes: remotes,
+        shared: mfShared
+    });
 
-
-if (process.env.NODE_ENV !== 'production') {
-    console.info('[mf] runtime initialized with remotes:', remotes);
-}
+    return _instance;
+})();
 
 /**
  * Wrapper around @module-federation/runtime.loadRemote
@@ -65,15 +122,10 @@ export function useModuleFederation() {
                 );
             }
 
-            const unmountFn =
-                typeof loadedModule.unmount === 'function'
-                    ? loadedModule.unmount
-                    : undefined;
-
             return {
                 name: moduleName,
                 mount: loadedModule.mount,
-                unmount: unmountFn,
+                unmount: loadedModule.unmount,
             };
         } catch (err) {
             console.error('[mf] failed to load remote', remoteId, err);
