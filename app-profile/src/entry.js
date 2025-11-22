@@ -1,5 +1,6 @@
 /// <reference path="../node_modules/mfe-components/global.d.ts" 
 import * as veeValidate from 'vee-validate';
+import { useForm, useField } from 'vee-validate';
 import { all } from '@vee-validate/rules';
 import { localize } from '@vee-validate/i18n';
 import { createApp } from 'vue';
@@ -8,6 +9,7 @@ import * as pinia from 'pinia';
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import App from './App.vue';
 import router from './router';
+import { veeValidateCompatPlugin, veeValidateDirectivePlugin } from './vee-validate';
 
 /**
  * @type {import('vue').App}
@@ -19,13 +21,6 @@ let piniaInstance;
 let app;
 
 window['app-profile'] = window['app-profile'] || {};
-/**
- * Bootstrap hook for module federation (optional lifecycle)
- */
-// export const bootstrap = window['app-profile'].bootstrap = function () {
-//   console.info('[app-profile] bootstrap() called');
-//   return Promise.resolve();
-// };
 
 /**
  * Mount hook for qiankun/module federation
@@ -69,8 +64,12 @@ export const mount = window['app-profile'].mount = function (selectorOrEl, props
         router: router,
         veeValidate: veeValidate,
         rules: all,
+        useForm: useForm,
+        useField: useField,
         localize: localize,
       });
+      app.use(veeValidateCompatPlugin);
+      app.use(veeValidateDirectivePlugin());
       app.mixin({
         methods: {
           myGlobalMethod(msg) {
@@ -111,16 +110,3 @@ export const unmount = window['app-profile'].unmount = function () {
 
   return Promise.resolve();
 }
-
-// Provide a default export & init/get aliases to mimic webpack container expectations
-// export const init = window['app-profile'].init = function (...args) {
-//   console.info('[app-profile] init() called with args:', args);
-//   return bootstrap(...args);
-// };
-
-// export const get = window['app-profile'].get = function (...args) {
-//   console.info('[app-profile] get() called with args:', args);
-//   return mount(...args);
-// };
-
-// export default { bootstrap, mount, unmount, init, get };

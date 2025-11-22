@@ -5,19 +5,44 @@
       <li v-for="item in timeline" :key="item.id">
         <strong>{{ item.label }}</strong>
         <span>{{ formatted(item.timestamp) }}</span>
+        <section v-if="item.id == 1" class="profile-login">
+          <VeeValidateCompatLogin v-on:login-success="console.log" v-on:login-failure="console.log" />
+        </section>
+        <section v-if="item.id == 2" class="profile-example">
+          <VeeValidateCompatExample />
+        </section>
       </li>
     </ul>
+    <section>
+      <h3>Directive Based Validation Example (Global)</h3>
+      <VeeValidateDirectiveLoginExample />
+      <VeeValidateDirectiveSimpleExample />
+    </section>
+    <section>
+      <h3>Directive Based Validation Example (Scoped)</h3>
+      <VeeValidateDirectiveScopedExample />
+    </section>
     <c-button @click="notifyShell">Notify Shell About Activity</c-button>
   </article>
 </template>
 
 <script>
 import { CButton } from 'mfe-components';
+import VeeValidateCompatLogin from '../vee-validate/examples/VeeValidateCompatLogin.vue';
+import VeeValidateCompatExample from '../vee-validate/examples/VeeValidateCompatExample.vue';
+import VeeValidateDirectiveSimpleExample from '../vee-validate/examples/VeeValidateDirectiveSimpleExample.vue';
+import VeeValidateDirectiveLoginExample from '../vee-validate/examples/VeeValidateDirectiveLoginExample.vue';
+import VeeValidateDirectiveScopedExample from '../vee-validate/examples/VeeValidateDirectiveScopedExample.vue';
 
 export default {
   name: 'ProfileActivity',
   components: {
-    CButton
+    CButton,
+    VeeValidateCompatLogin,
+    VeeValidateCompatExample,
+    VeeValidateDirectiveSimpleExample,
+    VeeValidateDirectiveLoginExample,
+    VeeValidateDirectiveScopedExample
   },
   props: {
     sharedUtils: {
