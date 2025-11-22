@@ -3,11 +3,21 @@
     <header class="profile-app__header">
       <h2>Profile Microfrontend</h2>
       <div class="profile-app__user" v-if="isAuthenticated">
-        Viewing profile for <strong>{{ username }}</strong>
+        Viewing profile for <strong>{{ useBridgeStore.user.name }} from username</strong>
+        <br />
+        <h3>
+          Global Counter: {{ useBridgeStore.counter }}
+        </h3>
       </div>
       <div class="profile-app__user" v-else>
         Awaiting authentication from shell...
       </div>
+      <hr />
+      <button class="c-button c-button--primary" @click="increment">Increment Count (Vuex)</button>
+      <button class="c-button c-button--primary" @click="decrement">Decrement Count (Vuex)</button>
+      <hr />
+      <button class="c-button c-button--primary" @click="incrementPinia">Increment Count (Pinia)</button>
+      <button class="c-button c-button--primary" @click="decrementPinia">Decrement Count (Pinia)</button>
     </header>
     <nav class="profile-app__nav">
       <router-link :to="{ name: 'profile-overview' }">Overview</router-link>
@@ -19,8 +29,6 @@
         <component
           :is="Component"
           :user="user"
-          :shared-utils="sharedUtils"
-          :shared-shell="sharedShell"
           :push-shared-state="pushSharedState"
         />
       </router-view>
@@ -29,28 +37,54 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
-
+import { useProfileStore } from './store';
 export default {
   name: 'ProfileApp',
+  inject: ['bridgeStore'],
   props: {
     sharedUtils: {
       type: Object,
       default: () => ({})
     }
   },
+  data() {
+    return {
+      useProfileStore: useProfileStore(),
+      useBridgeStore: this.$bridgeStore(),
+      useAuth: this.$derivedStore.auth(),
+    };
+  },
+  mounted() {
+    this.useAuth.$patch({
+      user: 'ganti'
+    });
+    this.useBridgeStore.$patch({
+      counter: 9999
+    });
+    console.log('[Pinia->Vuex] mounted.', this.useBridgeStore);
+    console.log('[Pinia->Vuex] mounted.', this.$store.getters['isAuthenticated']);
+  },
   computed: {
-    ...mapGetters(['isAuthenticated', 'username']),
-    user() {
-      return this.sharedUser;
-    }
+    profile() {
+      return this.useProfileStore.profile;
+    },
   },
   methods: {
     pushSharedState(partial = {}) {
       if (this.$microActions && typeof this.$microActions.pushSharedState === 'function') {
         this.$microActions.pushSharedState(partial);
       }
-    }
+    },
+    incrementPinia() {
+      this.useBridgeStore.$patch({
+        counter: this.useBridgeStore.counter + 1
+      });
+    },
+    decrementPinia() {
+      this.useBridgeStore.$patch({
+        counter: this.useBridgeStore.counter - 1
+      });
+    },
   }
 };
 </script>

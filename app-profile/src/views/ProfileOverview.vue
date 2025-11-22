@@ -6,7 +6,7 @@
     </p>
     <p v-else>
       Login from the shell to load profile data.
-    </p>
+    </p> 
     <section>
       <h4>Bio</h4>
       <p>{{ profile.bio }}</p>
@@ -19,14 +19,21 @@
         </li>
       </ul>
     </section>
+    <section>
+      <c-button>Notify Shell About Activity</c-button>
+    </section>
   </article>
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { CButton } from 'mfe-components';
+import { useProfileStore } from '../store';
 
 export default {
   name: 'ProfileOverview',
+  components: {
+    CButton,
+  },
   props: {
     sharedShell: {
       type: Object,
@@ -37,11 +44,21 @@ export default {
       default: () => ({})
     }
   },
+  data() {
+    return {
+      useProfileStore: useProfileStore(),
+      useBridgeStore: this.$bridgeStore(),
+      useAuth: this.$derivedStore.auth(),
+    };
+  },
   computed: {
-    ...mapGetters(['isAuthenticated', 'username']),
-    ...mapGetters(['profile']),
-    user() {
-      return this.sharedShell && this.sharedShell.user ? this.sharedShell.user : null;
+    profile() {
+      return this.useProfileStore.profile;
+    },
+  },
+  methods: {
+    onLoginSuccess(data) {
+      console.log('Login successful:', data);
     }
   }
 };

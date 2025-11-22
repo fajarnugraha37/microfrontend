@@ -1,35 +1,77 @@
+/// <reference path="../node_modules/mfe-components/global.d.ts" />
+
 /* eslint-disable no-underscore-dangle */
 if (window.__POWERED_BY_QIANKUN__) {
   // eslint-disable-next-line no-undef
-  __webpack_public_path__ = window.__INJECTED_PUBLIC_PATH_BY_QIANKUN__;
+  window.__webpack_public_path__ = window.__INJECTED_PUBLIC_PATH_BY_QIANKUN__;
 }
-/* eslint-enable no-underscore-dangle */
 
-import Vue from 'vue';
+import * as veeValidate from 'vee-validate';
+import { all } from '@vee-validate/rules';
+import { localize } from '@vee-validate/i18n';
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
+import * as pinia from 'pinia';
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import App from './App.vue';
 import router from './router';
-import { store } from './store';
 
-Vue.config.productionTip = false;
-
+/**
+ * @type {import('vue').App}
+ */
 let instance = null;
+/**
+ * @type {import('pinia').Pinia}
+ */
+let piniaInstance = null;
 function render(props = {}) {
-  const {
-    container,
-    store: parentStore,
-  } = props;
+  try {
+    const {
+      container,
+      store: parentStore,
+    } = props;
 
-  store.attachModule(parentStore);
-  instance = new window.Vue({
-    router,
-    store: parentStore,
-    render: (h) =>
-      h(App, {
-        store: store,
-        props: {
-        }
-      })
-  }).$mount(container ? container.querySelector('#app') : '#app');
+    // store.attachModule(parentStore);
+    if (piniaInstance == null) {
+      piniaInstance = createPinia();
+      piniaInstance.use(piniaPluginPersistedstate);
+    }
+
+    const app = createApp(App, {
+      props: {
+        store: parentStore,
+      },
+      mounted() {
+        console.info('[app-profile] mounted hook in App.vue');
+      }
+    });
+
+    app.use(piniaInstance);
+    app.use(router);
+    app.use(window.$__usePiniaStore(pinia, piniaInstance), {
+      'config': {},
+    });
+    app.use(window.$__useTransferablePlugin, {
+      piniaInstance: piniaInstance,
+      router: router,
+      veeValidate: veeValidate,
+      rules: all,
+      localize: localize,
+    });
+    app.mixin({
+      methods: {
+        myGlobalMethod(msg) {
+          console.log("[global]", msg);
+        },
+      },
+    });
+    app.mount(container ? container.querySelector('#app') : '#app');
+    instance = app;
+  } catch (error) {
+    console.error('Error during render:', error);
+  }
+
+  console.info('[app-profile] props from main framework', props);
 }
 
 if (!window.__POWERED_BY_QIANKUN__) {
@@ -41,17 +83,25 @@ export async function bootstrap() {
 }
 
 export async function mount(props) {
+  console.info('[app-profile] mount with props', props);
   render(props);
 }
 
 export async function unmount() {
+  console.info('[app-profile] unmount');
   if (instance) {
-    instance.$destroy();
-    instance.$el.innerHTML = '';
+    instance.unmount();
+    instance._container.innerHTML = '';
     instance = null;
+  }
+  if (piniaInstance) {
+    piniaInstance?.$__bridgeStore?.disposeBridge();
+    piniaInstance?.$__derivedStore?.disposeBridge();
+    piniaInstance = null;
   }
 }
 
 export async function update(props) {
   console.info('[app-profile] update props', props);
+  render(props);
 }

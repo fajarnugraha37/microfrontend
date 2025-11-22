@@ -1,58 +1,109 @@
-window.Vue.use(window.Vuex);
+import { defineStore } from "pinia";
+import { ref, computed } from "vue";
 
-/**
- * @type {import('vuex').Store} parentVuex 
- */
-export const profileStore = new window.Vuex.Store({
-  state: {
-    profile: {
-      bio: 'Front-end engineer passionate about microfrontends.',
-      interests: ['Vue.js', 'Qiankun', 'Design Systems']
+export const useProfileStore = defineStore("profile", () => {
+  // State
+  const profile = ref({
+    bio: 'Front-end engineer passionate about microfrontends.',
+    interests: ['Vue.js', 'Qiankun', 'Design Systems'],
+    nric: '',
+    fin: '',
+    uen: '',
+    // Add name/email/terms so they persist and can be used as pre-populated fields
+    name: '',
+    email: '',
+    terms: false
+  });
+
+  const sharedShell = ref({});
+
+  // Actions
+  const updateBio = (bio) => {
+    profile.value.bio = bio;
+  };
+
+  const updateInterests = (interests) => {
+    profile.value.interests = interests;
+  };
+
+  const updateName = (name) => {
+    profile.value.name = name;
+  };
+
+  const updateEmail = (email) => {
+    profile.value.email = email;
+  };
+
+  const updateTerms = (terms) => {
+    profile.value.terms = !!terms;
+  };
+
+  const updateNric = (nric) => {
+    profile.value.nric = nric;
+  };
+
+  const updateFin = (fin) => {
+    profile.value.fin = fin;
+  };
+
+  const updateUen = (uen) => {
+    profile.value.uen = uen;
+  };
+
+  const saveProfile = (payload) => {
+    if (payload.bio !== undefined) updateBio(payload.bio);
+    if (payload.interests !== undefined) updateInterests(payload.interests);
+    if (payload.nric !== undefined) updateNric(payload.nric);
+    if (payload.fin !== undefined) updateFin(payload.fin);
+    if (payload.uen !== undefined) updateUen(payload.uen);
+    if (payload.name !== undefined) updateName(payload.name);
+    if (payload.email !== undefined) updateEmail(payload.email);
+    if (payload.terms !== undefined) updateTerms(payload.terms);
+  };
+
+  const replaceSharedShell = (payload) => {
+    sharedShell.value = { ...payload };
+  };
+
+  const setSharedShell = (payload) => {
+    replaceSharedShell(payload);
+  };
+
+  // Getters
+  const sharedUser = computed(() =>
+    sharedShell.value && sharedShell.value.user ? sharedShell.value.user : null
+  );
+
+  return {
+    profile,
+    sharedShell,
+    updateBio,
+    updateInterests,
+    updateNric,
+    updateFin,
+    updateUen,
+    updateName,
+    updateEmail,
+    updateTerms,
+    saveProfile,
+    replaceSharedShell,
+    setSharedShell,
+    sharedUser
+  };
+}, {
+  persist: {
+    key: 'app-profile.profile',
+    debug: true,
+    storage: localStorage,
+    beforeHydrate: (context) => {
+      console.log('[Pinia PersistedState] beforeHydrate', context);
     },
-    sharedShell: {}
+    afterHydrate: (context) => {
+      console.log('[Pinia PersistedState] afterHydrate', context);
+    },
   },
-  mutations: {
-    updateBio(state, bio) {
-      state.profile.bio = bio;
-    },
-    updateInterests(state, interests) {
-      state.profile.interests = interests;
-    },
-    replaceSharedShell(state, payload) {
-      state.sharedShell = { ...payload };
-    }
-  },
-  actions: {
-    saveProfile({ commit }, payload) {
-      commit('updateBio', payload.bio);
-      commit('updateInterests', payload.interests);
-    },
-    setSharedShell({ commit }, payload) {
-      commit('replaceSharedShell', payload);
-    }
-  },
-  getters: {
-    profile: (state, getters, rootState) => () => state.profile,
-    sharedShell: (state, getters, rootState) => () => state.sharedShell,
-    sharedUser: (state, getters, rootState) => () =>
-      state.sharedShell && state.sharedShell.user ? state.sharedShell.user : null
-  }
 });
 
-export const store = {
-  /**
-   * @param {import('vuex').Store} parentVuex 
-   */
-  attachModule: (parentVuex) => {
-    parentVuex.registerModule("profile", profileStore);
-    store.value = parentVuex;
-  },
-  /**
-   * @param {import('vuex').Store} parentVuex 
-   */
-  detachModule: (parentVuex) => {
-    parentVuex.unregisterModule("profile");
-    store.value = null;
-  },
-  value: null
+export default {
+  useProfileStore,
 };

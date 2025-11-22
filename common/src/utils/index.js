@@ -1,5 +1,10 @@
+export * from "./configLoader";
+export * from "./formatPrice";
+export * from "./obj";
+
 import loadConfig from "./configLoader";
 import formatPrice from "./formatPrice";
+import * as obj from "./obj";
 
 export const utils = {
   formatDate: (value) => {
@@ -21,12 +26,21 @@ export const utils = {
   delay: (ms = 0) => new Promise((resolve) => setTimeout(resolve, ms)),
   formatPrice: formatPrice,
   loadConfig: loadConfig,
+  obj: obj,
 };
 
 export const useUtilities = (vue) => {
   vue.use(new class UtilitiesPlugin {
-    install(Vue) {
-      Vue.prototype.$utils = utils;
+    version = 'vue-2';
+    type = 'global';
+    name = 'Global-Utilities';
+
+    install(app) {
+      if (!app?.config?.globalProperties) {
+        app.prototype.$utils = utils;
+      } else {
+        app.config.globalProperties.$utils = utils;
+      }
     }
   })
-}
+};

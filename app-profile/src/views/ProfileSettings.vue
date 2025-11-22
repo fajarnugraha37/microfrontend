@@ -1,17 +1,7 @@
 <template>
   <article class="profile-settings">
     <h3>Profile Settings</h3>
-    <form @submit.prevent="save">
-      <label>
-        <span>Bio</span>
-        <textarea v-model="form.bio" rows="3"></textarea>
-      </label>
-      <label>
-        <span>Interests (comma separated)</span>
-        <input v-model="form.interests" type="text">
-      </label>
-      <c-button type="submit">Save Profile</c-button>
-    </form>
+    <Questionnaire />
     <p v-if="savedAt" class="profile-settings__status">
       Saved at {{ formatted(savedAt) }}
     </p>
@@ -19,13 +9,15 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
 import { CButton } from 'mfe-components';
+import { useProfileStore } from '../store';
+import Questionnaire from '../components/Questionnaire.vue';
 
 export default {
   name: 'ProfileSettings',
   components: {
-    CButton
+    CButton,
+    Questionnaire
   },
   props: {
     sharedShell: {
@@ -43,6 +35,9 @@ export default {
   },
   data() {
     return {
+      useProfileStore: useProfileStore(),
+      useBridgeStore: this.$bridgeStore(),
+      useAuth: this.$derivedStore.auth(),
       form: {
         bio: '',
         interests: ''
@@ -51,14 +46,23 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['profile'])
+    profile() {
+      return this.useProfileStore.profile;
+    }
   },
   created() {
     this.form.bio = this.profile.bio;
     this.form.interests = this.profile.interests.join(', ');
   },
   methods: {
-    ...mapActions(['saveProfile']),
+    saveProfile(partial) {
+      this.useProfileStore.$patch({
+        profile: {
+          ...this.useProfileStore.profile,
+          ...partial
+        }
+      });
+    },
     save() {
       const interests = this.form.interests
         .split(',')

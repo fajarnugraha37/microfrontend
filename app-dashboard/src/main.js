@@ -1,3 +1,5 @@
+/// <reference path="../node_modules/mfe-components/global.d.ts" />
+
 /* eslint-disable no-underscore-dangle */
 if (window.__POWERED_BY_QIANKUN__) {
   // eslint-disable-next-line no-undef
@@ -15,9 +17,12 @@ let instance = null;
 function render(props = {}) {
   const {
     container,
-    store: parentStore,
+    getStore,
   } = props;
-
+  const parentStore = getStore ? getStore() : null;
+  if (!parentStore) {
+    throw new Error('[app-dashboard] please use attachModule and detachModule to manage store modules');
+  } 
   store.attachModule(parentStore);
   instance = new window.Vue({
     router,

@@ -1,4 +1,5 @@
 import { AuthService } from '../services/auth';
+import { bridgeReplaceState } from 'mfe-components';
 
 const state = {
   token: '', // Only set from Vuex mutations/actions
@@ -6,6 +7,9 @@ const state = {
 };
 
 const mutations = {
+  BRIDGE_REPLACE_STATE(state, newRoot) {
+    bridgeReplaceState.call(this, 'auth', state, newRoot);
+  },
   setToken(state, token) {
     state.token = token;
   },
@@ -32,9 +36,9 @@ const actions = {
   },
 };
 
-export default {
+export const authStore = {
   namespaced: true,
-  state,
-  mutations,
-  actions,
+  state: state,
+  mutations: mutations,
+  actions: actions,
 };

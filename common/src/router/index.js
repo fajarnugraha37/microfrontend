@@ -6,6 +6,10 @@ import { routes } from './routes';
  */
 export const useRouter = (vue) => {
   vue.use(new class CustomRouterPlugin {
+    version = 'vue-2';
+    type = 'router';
+    name = 'Router-Vue-Router-3';
+    
     install(Vue) {
       Vue.use(window.VueRouter);
       const router = window.router = new window.VueRouter({

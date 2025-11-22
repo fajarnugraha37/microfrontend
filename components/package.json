@@ -1,17 +1,27 @@
 {
   "name": "mfe-components",
-  "version": "0.1.0",
+  "version": "0.6.0",
   "private": false,
   "main": "dist/mfe-components.umd.js",
   "module": "dist/mfe-components.common.js",
   "files": [
     "dist",
-    "src"
+    "src",
+    "global.d.ts",
+    "docs",
+    "README.md"
   ],
+  "types": "./global.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/mfe-components.common.js",
-      "require": "./dist/mfe-components.umd.js"
+      "import": {
+        "default": "./dist/mfe-components.common.js",
+        "types": "./global.d.ts"
+      },
+      "require": {
+        "default": "./dist/mfe-components.umd.js",
+        "types": "./global.d.ts"
+      }
     }
   },
   "scripts": {
@@ -20,8 +30,9 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "async-mutex": "^0.5.0",
     "core-js": "^3.8.3",
-    "vue": "^2.6.14"
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",
@@ -29,7 +40,11 @@
     "@vue/cli-service": "~4.5.0",
     "babel-eslint": "^10.1.0",
     "eslint": "^7.32.0",
-    "eslint-plugin-vue": "^6.2.2"
+    "eslint-plugin-vue": "^6.2.2",
+    "vue": "^2.6.14",
+    "pinia": "^3.0.4",
+    "vuex": "^3.6.2",
+    "vuex-persistedstate": "^4.1.0"
   },
   "peerDependencies": {
     "vue": "^2.6.0"

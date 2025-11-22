@@ -1,5 +1,28 @@
+/// <reference path="../global.d.ts" />
+
+import "./initialize";
 import CButton from './components/CButton.vue';
 import CInput from './components/CInput.vue';
+import { 
+  deepPatch, 
+  getModuleState 
+} from "./utils";
+import {
+  bridgeReplaceState, 
+  createGlobalPiniaStoreFromVuex, 
+  createPiniaStoreFromVuex, 
+  createVuexModulePiniaBridge, 
+  createVuexRootPiniaBridge, 
+  registerBridges, 
+  useDerivedStore, 
+  usePiniaStore, 
+  useVuexStore,
+  useTransferablePlugin,
+} from "./stores";
+import {
+  bus,
+  mfeEventBus
+} from "./bus";
 
 const components = [CButton, CInput];
 
@@ -18,10 +41,39 @@ if (typeof window !== 'undefined' && window.Vue) {
   install(window.Vue);
 }
 
-export { CButton, CInput };
+export {
+  CButton,
+  CInput,
+  deepPatch,
+  getModuleState,
+  bridgeReplaceState,
+  createGlobalPiniaStoreFromVuex,
+  createPiniaStoreFromVuex,
+  createVuexModulePiniaBridge,
+  createVuexRootPiniaBridge,
+  registerBridges, useDerivedStore,
+  usePiniaStore,
+  useVuexStore,
+  bus,
+  mfeEventBus,
+  useTransferablePlugin,
+};
 
 export default {
   install,
   CButton,
-  CInput
+  CInput,
+  deepPatch,
+  getModuleState,
+  bridgeReplaceState,
+  createGlobalPiniaStoreFromVuex,
+  createPiniaStoreFromVuex,
+  createVuexModulePiniaBridge,
+  createVuexRootPiniaBridge,
+  registerBridges, useDerivedStore,
+  usePiniaStore,
+  useVuexStore,
+  bus,
+  mfeEventBus,
+  useTransferablePlugin,
 };

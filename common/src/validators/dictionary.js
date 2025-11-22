@@ -1,7 +1,12 @@
 export default {
   en: {
     messages: {
-      required: (field) => `${field} is required`,
+      required: (field) => {
+        if (typeof field === 'object') {
+          field = field.field || field;
+        }
+        `${field} is required`
+      },
       validPassword: () => 'Password must meet complexity requirements',
       fileNumber: () => 'Invalid number of files',
       fileSize: () => 'File size is too large',
