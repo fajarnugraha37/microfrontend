@@ -19,6 +19,7 @@
     </span>
 
     <button type="submit">Login</button>
+    <button type="button" @click="onReset">Reset</button>
   </form>
 </template>
 
@@ -42,6 +43,10 @@ export default {
 
       // do real login stuff here
       console.log('submit ok');
+    },
+    async onReset() {
+      // this.$validator from plugin
+      this.$validator.reset();
     },
   },
 };

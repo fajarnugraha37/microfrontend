@@ -68,8 +68,7 @@ export const mount = window['app-profile'].mount = function (selectorOrEl, props
         useField: useField,
         localize: localize,
       });
-      app.use(veeValidateCompatPlugin);
-      app.use(veeValidateDirectivePlugin());
+      app.use(veeValidateCompatPlugin());
       app.mixin({
         methods: {
           myGlobalMethod(msg) {
